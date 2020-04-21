@@ -37,6 +37,16 @@ public class Inverse_Kinematics : MonoBehaviour
         {
             joints[i].position = jointPos[i];
         }
+
+        /*
+        List<Quaternion> segmentRot = new List<Quaternion>();
+        foreach (Transform t in ???)
+        {
+            segmentRot.Add(t.rotation);
+        }
+
+        align_segments(ref segmentRot, jointPos);
+        */
     }
 
     private void fabrik_solve(Vector3 target, ref List<Vector3> jointPos) {
@@ -75,6 +85,14 @@ public class Inverse_Kinematics : MonoBehaviour
 
                 dif = Math.Abs(Vector3.Distance(jointPos[lengths.Count], target));
             }
+        }
+    }
+
+    private void align_segments(ref List<Quaternion> segmentRot, List<Vector3> jointPos)
+    {
+        for (int i = 0; i < segmentRot.Count; ++i)
+        {
+            segmentRot[i] = Quaternion.FromToRotation(Vector3.up, jointPos[i] - jointPos[i + 1]);
         }
     }
 }
