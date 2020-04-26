@@ -22,7 +22,6 @@ public class Inverse_Kinematics : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //TODO: update target
         target = targetObj.transform.position;
 
         List<Vector3> jointPos = new List<Vector3>();
@@ -31,22 +30,17 @@ public class Inverse_Kinematics : MonoBehaviour
             jointPos.Add(t.position);
         }
 
+        //Use inverse kinematics to find the new joint positions
         fabrik_solve(target, ref jointPos);
 
-        for (int i = 0; i < joints.Count; ++i)
-        {
-            joints[i].position = jointPos[i];
-        }
+        //Now we have to rotate the joints to match these positions
 
-        /*
-        List<Quaternion> segmentRot = new List<Quaternion>();
-        foreach (Transform t in ???)
-        {
-            segmentRot.Add(t.rotation);
-        }
+        List<Quaternion> segmentRot = align_segments(jointPos);
 
-        align_segments(ref segmentRot, jointPos);
-        */
+        for (int i = 0; i < segmentRot.Count; ++i)
+        {
+            joints[i].rotation = segmentRot[i];
+        }
     }
 
     private void fabrik_solve(Vector3 target, ref List<Vector3> jointPos) {
@@ -88,11 +82,16 @@ public class Inverse_Kinematics : MonoBehaviour
         }
     }
 
-    private void align_segments(ref List<Quaternion> segmentRot, List<Vector3> jointPos)
+    private List<Quaternion> align_segments(List<Vector3> jointPos)
     {
-        for (int i = 0; i < segmentRot.Count; ++i)
+        List<Quaternion> segmentRot = new List<Quaternion>();
+        for (int i = 0; i < jointPos.Count - 1; ++i)
         {
-            segmentRot[i] = Quaternion.FromToRotation(Vector3.up, jointPos[i] - jointPos[i + 1]);
+            //Vector3.left works for the right arm, but not sure about the other limbs
+            //We might have to generalize this later by aligning based on the previous joint positions
+            segmentRot.Add(Quaternion.FromToRotation(Vector3.left, jointPos[i] - jointPos[i + 1]));
         }
+
+        return segmentRot;
     }
 }
