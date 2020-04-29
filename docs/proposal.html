@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184 Final Project Proposal</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2020</h1>
+<h1 align="middle">Final Project Proposal: Unity 3D Robot Animation and Control</h1>
+<h2 align="middle">Jinwoo Park, Alex Chan, Eric McCormick, Brian Stone</h2>
+
+<p>We plan to use inverse kinematics to solve joint angles and make a virtual robot's animation run smoothly. This type of animation is widely used in modern realistic video games such as The Witcher 3 and Grand Theft Auto V.</p>
+
+<h2 align="middle">Description</h2>
+<p>Animation is one of the primary applications of computer graphics found in modern entertainment, providing the foundation for films and video games alike. One of the cornerstones of good animation is having the movement of characters feel realistic, with their motion obeying the geometric constraints implied by their shapes. This realistic motion is normally enforced through the use of “skeletons”, made up of a series of connected rigid bodies in a kinematic chain. A series of kinematic equations at each joint of the figure fully defines the range of movement allowed by the skeleton.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+
+As an animator, there are two primary methods for interfacing with this skeleton. The first is known as forward kinematics, and involves manually setting the joint angles at each intersection, and thus defining the resulting pose of the character. However, a far more intuitive approach, and one that leverages a greater degree of intuition about the movement of the human body, is to simply drag the body parts of the character into the proper configuration to support the desired pose. If the animator were able to freely drag body parts however they wished, however, very often the characters would end up performing actions that should be impossible given their skeletal makeup. The solution? Inverse kinematics.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+
+Inverse kinematics is the process of computing the joint angles for all elements of the skeleton required to support a given configuration. For example, if an animator dragged a character’s hand to a new location, the modeling program they’re working in would have to compute new joint angles for the wrist, elbow and shoulder joints. With those joint angles updated, the animator would then see a smooth movement of the character’s entire arm following proper geometric rules, even though they were only moving the character’s hand. Inverse kinematics is by no means a trivial problem to solve, but doing so is key in supporting computer animation.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+
+There are several tasks we’ll have to tackle in order to solve the inverse kinematics problem. The first is making the robot skeleton that we’ll be applying inverse kinematics to. We plan on building this in the Unity 3D game engine, as it gives us access to a defined physics system and rigid body components that we can use to construct the skeleton. The second task is to actually implement our inverse kinematic system, which we plan to do by using heuristics and iterative optimization to construct an approximate form of the forward kinematics equation, and then inverting that to find our IK solution.  Finally, we’ll be testing our IK system by adding controls and constructing a simulated environment for the player to walk our robot through. If all goes well, we should be able to support smooth, anthropomorphic motion through a varied terrain.</p>
+
+<h2 align="middle">Goals and Deliverables</h2>
+<ul>
+  <li>To demonstrate our work, we will create a free-roam scene in Unity where others will be able to move the robot using computer controls, and witness our inverse kinematics system.</li>
+  <li>We will measure the performance of the system by using the proportion of the path that the robot has traveled. We will also design some metric as a reward function to encourage the robot to maintain a good posture and keep itself upright.</li>
+  <li>We want to discuss if the inverse kinematics method for the robot’s motion is suitable under various external forces and if there are additional constraints that further assist the robot. For example, we want to test the robot’s stability when it is encountered with sudden wind or angled ground. We want to also discuss how we can apply the reinforcement learning to train the robot unsupervised.</li>
+  <li>At bare minimum, we want to be able to create animation for the robot as if it were a player in a realistic game. We want the animations to be as smooth as possible when the robot has to interact with things such as slopes.</li>
+  <li>If everything goes smoothly, it would be fun if we could create a small game that can showcase the animations of the robot? This is a fairly far-fetched goal. A more realistic one would just be a simple game overall that may not showcase the animations as its primary purpose. Reinforcement learning would also be a stretch goal since it would be interesting to see how the robot’s movement would change overtime.
+  </li>
+</ul>
+
+<h2 align="middle">Task Schedule</h2>
+<ul>
+  <li>Week 1 (4/9):
+    <ul>
+      <li>Understand IK</li>
+      <li>Work on basic robot</li>
+    </ul>
+  <li>Week 2 (4/16):
+    <ul>
+      <li>Work on IK system</li>
+    </ul>
+  <li>Week 3 (4/23):
+    <ul>
+      <li>Video/slides</li>
+      <li>Create new website for milestone</li>
+      <li>Adjust goals</li>
+      <li>Finish IK</li>
+      <li>Make demo</li>
+    </ul>
+  </li>
+  <li>Week 4 (4/30):
+    <ul>
+      <li>Prepare presentation</li>
+      <li>Update slides</li>
+      <li>Update website</li>
+      <li>Polish demo</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 align="middle">Resources</h2>
+<p>We will be using the Unity engine to implement our own control and inverse kinematics systems. For the inverse kinematics component, we will study the following papers:
+  <ul>
+    <li>Michael Girard and A. A. Maciejewski. 1985. Computational modeling for the computer animation of legged figures. SIGGRAPH Comput. Graph. 19, 3 (July 1985), 263–270. DOI:https://doi.org/10.1145/325165.325244</li>
+    <li>Aristidou, A., Lasenby, J., Chrysanthou, Y. and Shamir, A. (2018), Inverse Kinematics Techniques in Computer Graphics: A Survey. Computer Graphics Forum, 37: 35-58. doi:10.1111/cgf.13310</li>
+  </ul>
+  We may also use various resources from CS 188 (Artificial Intelligence), and other controls-related courses at UC Berkeley, for the control system we implement in this project. We will present the aforementioned demo through itch.io.
+  </p>
+
+</body>
+</html>
