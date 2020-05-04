@@ -8,10 +8,12 @@ public class Joint
 {
     public Transform transform;
 
-    //Constraints for rotation about each local axis in degrees
-    public float xMin, xMax;
-    public float yMin, yMax;
-    public float zMin, zMax;
+    //Constraints for orientation in degrees
+    public float oMin, oMax;
+
+    //Constraints for rotation in degrees, between 0 and 360
+    public float thetaMin, thetaMax;
+    public float phiMin, phiMax;
 }
 
 public class InverseKinematics : MonoBehaviour
@@ -19,55 +21,44 @@ public class InverseKinematics : MonoBehaviour
     [SerializeField]
     private List<Joint> joints;
 
-    private Transform target;
-
     [SerializeField]
-    private GameObject targetObj;//TODO: eventually replace this with the ground/whatever object we want the robot to be touching
+    private Transform origin, target;
     
     void Update()
     {
-        target = targetObj.transform;
-
-        //Use inverse kinematics to find the new joint positions
-        fabrik_solve(target, ref joints);
+        fabrik_solve(target, in joints);
     }
 
-    private void fabrik_solve(Transform target, ref List<Joint> joints) {
-        List<Vector3> jointPos = new List<Vector3>();
-        List<Quaternion> jointRot = new List<Quaternion>();
+    private void fabrik_solve(Transform target, in List<Joint> joints) {
+        List<Vector3> joint_positions = new List<Vector3>();
+        List<Quaternion> joint_rotations = new List<Quaternion>();
         foreach (Joint j in joints)
         {
-            jointPos.Add(j.transform.position);
-            jointRot.Add(j.transform.rotation);
+            joint_positions.Add(j.transform.position);
+            joint_rotations.Add(j.transform.rotation);
         }
 
         List<float> lengths = new List<float>();
-        for (int i = 0; i < jointPos.Count - 1; ++i)
+        for (int i = 0; i < joint_positions.Count - 1; ++i)
         {
-            lengths.Add(Vector3.Distance(jointPos[i], jointPos[i + 1]));
+            lengths.Add(Vector3.Distance(joint_positions[i], joint_positions[i + 1]));
         }
 
         float tolerance = 0.1f * lengths.Sum();
-        if (Math.Abs(Vector3.Distance(jointPos[0], target.position)) >= lengths.Sum())
+        if (Math.Abs(Vector3.Distance(joint_positions[0], target.position)) >= lengths.Sum())
         {
-            float lambda = lengths[0] / Vector3.Distance(jointPos[0], target.position);
-            jointPos[1] = (1.0f - lambda) * jointPos[0] + lambda * target.position;
-            jointRot[0] = align_segment(jointRot[0], jointPos[1] - jointPos[0]);
-
-            //For now at least, the first joint is constrained relative to the ORIGIN
-            jointRot[0] = constrain_rotation(jointRot[0], joints[0]);
-            jointPos[1] = jointPos[0] + lengths[0] * (jointRot[0] * Vector3.right);
-
+            {
+                Vector3 dir = target.position - joint_positions[0];
+                joint_positions[1] = joint_positions[0] + (lengths[0] / dir.magnitude) * dir;
+                Joint j = joints[0];
+                joint_rotations[0] = orientation(dir, origin.rotation, j.oMin, j.oMax);
+            }
             for (int i = 1; i < lengths.Count; ++i)
             {
-                lambda = lengths[i] / Vector3.Distance(jointPos[i], target.position);
-                jointPos[i + 1] = (1.0f - lambda) * jointPos[i] + lambda * target.position;
-                jointRot[i] = align_segment(jointRot[i], jointPos[i + 1] - jointPos[i]);
-
-                //Apply constraints relative to parent's orientation
-                Quaternion localRotation = Quaternion.Inverse(jointRot[i - 1]) * jointRot[i];
-                jointRot[i] = jointRot[i - 1] * constrain_rotation(localRotation, joints[i]);
-                jointPos[i + 1] = jointPos[i] + lengths[i] * (jointRot[i] * Vector3.right);
+                Vector3 dir = target.position - joint_positions[i];
+                joint_positions[i + 1] = joint_positions[i] + (lengths[i] / dir.magnitude) * dir;
+                Joint j = joints[i];
+                joint_rotations[i] = orientation(dir, joint_rotations[i - 1], j.oMin, j.oMax);
             }
         } else
         {
@@ -76,38 +67,32 @@ public class InverseKinematics : MonoBehaviour
             while (dif > tolerance)
             {
                 //First pass: end to base
-                jointPos[lengths.Count] = target.position;
-
-                float lambda;
-                for (int i = lengths.Count - 1; i >= 0; --i) {
-                    lambda = lengths[i] / Vector3.Distance(jointPos[i], jointPos[i + 1]);
-                    jointPos[i] = (1.0f - lambda) * jointPos[i + 1] + lambda * jointPos[i];
-
-                    //TODO: implement constraints during the first pass
+                joint_positions[lengths.Count] = target.position;
+                joint_rotations[lengths.Count] = target.rotation;
+                for (int i = lengths.Count - 1; i > 0; --i)
+                {
+                    Vector3 dir = joint_positions[i + 1] - joint_positions[i];
+                    joint_positions[i] = joint_positions[i + 1] - (lengths[i] / dir.magnitude) * dir;
+                    Joint j = joints[i + 1];
+                    joint_rotations[i] = orientation(dir, joint_rotations[i + 1], 360f - j.oMax, 360f - j.oMin);
                 }
 
                 //Second pass: base to end
-                lambda = lengths[0] / Vector3.Distance(jointPos[0], jointPos[1]);
-                jointPos[1] = (1.0f - lambda) * jointPos[0] + lambda * jointPos[1];
-                jointRot[0] = align_segment(jointRot[0], jointPos[1] - jointPos[0]);
-
-                //For now at least, the first joint is constrained relative to the ORIGIN
-                jointRot[0] = constrain_rotation(jointRot[0], joints[0]);
-                jointPos[1] = jointPos[0] + lengths[0] * (jointRot[0] * Vector3.right);
-
+                {
+                    Vector3 dir = joint_positions[1] - joint_positions[0];
+                    joint_positions[1] = joint_positions[0] + (lengths[0] / dir.magnitude) * dir;
+                    Joint j = joints[0];
+                    joint_rotations[0] = orientation(dir, origin.rotation, j.oMin, j.oMax);
+                }
                 for (int i = 1; i < lengths.Count; ++i)
                 {
-                    lambda = lengths[i] / Vector3.Distance(jointPos[i], jointPos[i + 1]);
-                    jointPos[i + 1] = (1.0f - lambda) * jointPos[i] + lambda * jointPos[i + 1];
-                    jointRot[i] = align_segment(jointRot[i], jointPos[i + 1] - jointPos[i]);
-
-                    //Apply constraints relative to parent's orientation
-                    Quaternion localRotation = Quaternion.Inverse(jointRot[i - 1]) * jointRot[i];
-                    jointRot[i] = jointRot[i - 1] * constrain_rotation(localRotation, joints[i]);
-                    jointPos[i + 1] = jointPos[i] + lengths[i] * (jointRot[i] * Vector3.right);
+                    Vector3 dir = joint_positions[i + 1] - joint_positions[i];
+                    joint_positions[i + 1] = joint_positions[i] + (lengths[i] / dir.magnitude) * dir;
+                    Joint j = joints[i];
+                    joint_rotations[i] = orientation(dir, joint_rotations[i - 1], j.oMin, j.oMax);
                 }
 
-                dif = Math.Abs(Vector3.Distance(jointPos[lengths.Count], target.position));
+                dif = Math.Abs(Vector3.Distance(joint_positions[lengths.Count], target.position));
                 ++num_loops;
                 if (num_loops > 10)
                 {
@@ -117,32 +102,16 @@ public class InverseKinematics : MonoBehaviour
             }
         }
 
-        //Lazily match end effector's orientation with target. We will work on constraining this later (maybe)
-        jointRot[lengths.Count] = target.rotation;
-
         for (int i = 0; i < joints.Count; ++i)
         {
-            joints[i].transform.rotation = jointRot[i];
+            joints[i].transform.rotation = joint_rotations[i];
         }
     }
 
-    //Aligns "from" to point in direction "to". Use this over FromToRotation to avoid random flipping
-    private Quaternion align_segment(Quaternion from, Vector3 to)
+    private Quaternion orientation(Vector3 child_direction, Quaternion parent_rotation, float oMin, float oMax)
     {
-        Vector3 forward = Vector3.Cross(to, from * Vector3.up);
-        Vector3 up = Vector3.Cross(forward, to);
-        return Quaternion.LookRotation(forward, up);
-    }
-
-    //Constrains the local orientation of a joint
-    private Quaternion constrain_rotation(Quaternion rotation, Joint joint)
-    {
-        //TODO: this doesn't really work yet, possibly because rotations aren't necessary applied in the order x-y-z or z-y-x
-        //We have to figure this out if we want realistic poses
-        Vector3 rotation_euler = rotation.eulerAngles;
-        //rotation_euler.x = Mathf.Clamp(rotation_euler.x, joint.xMin, joint.xMax);
-        //rotation_euler.y = Mathf.Clamp(rotation_euler.y, joint.yMin, joint.yMax);
-        //rotation_euler.z = Mathf.Clamp(rotation_euler.z, joint.zMin, joint.zMax);
-        return Quaternion.Euler(rotation_euler);
+        Quaternion q = Quaternion.FromToRotation(parent_rotation * Vector3.right, child_direction) * parent_rotation;
+        float clamped = (oMin < 360f - oMax) ? oMin : oMax;
+        return Quaternion.AngleAxis(clamped, child_direction) * q;
     }
 }
