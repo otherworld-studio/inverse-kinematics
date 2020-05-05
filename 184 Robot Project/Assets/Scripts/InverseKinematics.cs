@@ -26,8 +26,9 @@ public struct Joint
     //Constraints for orientation in degrees, from -180 to 180
     public float phiMin, phiMax;
 
-    //Axis constraint for hinge joints
+    //Hinge joints only
     public Axis axis;
+    public float thetaMin, thetaMax;
 }
 
 public class InverseKinematics : MonoBehaviour
@@ -71,7 +72,7 @@ public class InverseKinematics : MonoBehaviour
         {
             Vector3 dir = target.position - joint_positions[0];
             Joint j = joints[0];
-            joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), -j.phiMax, -j.phiMin);
+            joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), j.phiMin, j.phiMax);
             for (int i = 1; i < joints.Count; ++i)
             {
                 joint_positions[i] = joint_positions[i - 1] + (lengths[i - 1] / dir.magnitude) * dir;
@@ -103,7 +104,7 @@ public class InverseKinematics : MonoBehaviour
                 //Second pass: base to end
                 dir = joint_positions[1] - joint_positions[0];
                 j = joints[0];
-                joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), -j.phiMax, -j.phiMin);
+                joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), j.phiMax, j.phiMin);
                 Quaternion q;
                 for (int i = 1; i < lengths.Count; ++i)
                 {
@@ -125,7 +126,7 @@ public class InverseKinematics : MonoBehaviour
 
                 dif = Math.Abs(Vector3.Distance(joint_positions[lengths.Count], target.position));
                 ++num_loops;
-                if (num_loops > 10)
+                if (num_loops > 100)
                 {
                     Debug.Log("IK took too long to converge!");
                     break;
@@ -153,15 +154,18 @@ public class InverseKinematics : MonoBehaviour
     //Constrains the direction vector between from and to, according to the angle constraints of the joint at from
     private Vector3 get_direction(Vector3 from, Vector3 to, Quaternion rot, Joint j)
     {
+        Vector3 dir = to - from;
         if (j.type == JointType.hinge)
         {
-            //n defines the plane of the joint
             Vector3 n = rot * ((j.axis == Axis.x) ? Vector3.right :
                                (j.axis == Axis.y) ? Vector3.up :
                                                     Vector3.forward);
-            //TODO
-            //return dir;
+            //Planar projection
+            dir -= Vector3.Dot(dir, n) * n;
+            Vector3 straight = rot * Vector3.right;
+            float angle = Mathf.Clamp(Vector3.SignedAngle(straight, dir, n), j.thetaMin, j.thetaMax);
+            return Quaternion.AngleAxis(angle, n) * straight;
         }
-        return to - from;
+        return dir;
     }
 }
