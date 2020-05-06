@@ -41,9 +41,8 @@ public class IKAnimation : MonoBehaviour
             timer = 0f;
         }
 
-        float t = timer / keyframes[cur].period;
-
         //Interpolate position and rotation
+        float t = Mathf.SmoothStep(0f, 1f, timer / keyframes[cur].period);
         Transform t0 = keyframes[cur].transform;
         Transform t1 = keyframes[next].transform;
         target.position = Vector3.Lerp(t0.position, t1.position, t);
