@@ -88,21 +88,25 @@ public class InverseKinematics : MonoBehaviour
             joint_rotations.Add(j.transform.rotation);
         }
 
-        float tolerance = 0.1f * lengths.Sum();
+        //TODO: incorporate some kind of orientational "distance" into the cost
         if (Math.Abs(Vector3.Distance(joint_positions[0], target.position)) >= lengths.Sum())
         {
-            Vector3 dir = target.position - joint_positions[0];
-            joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), joints[0]);
+            Vector3 dir = origin.rotation * Vector3.right;
+            Joint j = joints[0];
+            Quaternion q = constrain_spin(reorient(joint_rotations[0], dir), origin.rotation, dir, j);
+            dir = get_direction(joint_positions[0], target.position, q, j);
+            joint_rotations[0] = reorient(q, dir);
             for (int i = 1; i < joints.Count; ++i)
             {
                 joint_positions[i] = joint_positions[i - 1] + (lengths[i - 1] / dir.magnitude) * dir;
-                Joint j = joints[i];
-                Quaternion q = constrain_spin(dir, joint_rotations[i - 1], j);
+                j = joints[i];
+                q = constrain_spin(reorient(joint_rotations[i], dir), joint_rotations[i - 1], dir, j);
                 dir = get_direction(joint_positions[i], target.position, q, j);
-                joint_rotations[i] = reorient(dir, q);
+                joint_rotations[i] = reorient(q, dir);
             }
         } else
         {
+            float tolerance = 0.1f * lengths.Sum();
             int num_loops = 0;
             float dif = float.PositiveInfinity;
             while (dif > tolerance)
@@ -111,36 +115,41 @@ public class InverseKinematics : MonoBehaviour
                 joint_positions[lengths.Count] = target.position;
                 joint_rotations[lengths.Count] = target.rotation;
                 Vector3 dir;
+                Joint j;
                 for (int i = lengths.Count - 1; i > 0; --i)
                 {
-                    Joint j = new Joint(joints[i + 1], true);
+                    j = new Joint(joints[i + 1], true);
                     dir = get_direction(joint_positions[i], joint_positions[i + 1], joint_rotations[i + 1], j);
                     joint_positions[i] = joint_positions[i + 1] - (lengths[i] / dir.magnitude) * dir;
-                    joint_rotations[i] = constrain_spin(dir, reorient(dir, joint_rotations[i + 1]), j);
+                    joint_rotations[i] = constrain_spin(reorient(joint_rotations[i], dir), reorient(joint_rotations[i + 1], dir), dir, j);
                 }
 
                 //Second pass: base to end
-                dir = joint_positions[1] - joint_positions[0];
-                joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), joints[0]);
+                dir = origin.rotation * Vector3.right;
+                j = joints[0];
+                Quaternion q = constrain_spin(reorient(joint_rotations[0], dir), origin.rotation, dir, j);
+                dir = get_direction(joint_positions[0], joint_positions[1], q, j);
+                joint_rotations[0] = reorient(q, dir);
                 for (int i = 1; i < lengths.Count; ++i)
                 {
                     joint_positions[i] = joint_positions[i - 1] + (lengths[i - 1] / dir.magnitude) * dir;
-                    Joint j = joints[i];
-                    Quaternion q = constrain_spin(dir, joint_rotations[i - 1], j);
+                    j = joints[i];
+                    q = constrain_spin(reorient(joint_rotations[i], dir), joint_rotations[i - 1], dir, j);
                     dir = get_direction(joint_positions[i], joint_positions[i + 1], q, j);
-                    joint_rotations[i] = reorient(dir, q);
+                    joint_rotations[i] = reorient(q, dir);
                 }
 
                 //End effector
-                joint_positions[lengths.Count] = joint_positions[lengths.Count - 1] + (lengths[lengths.Count - 1] / dir.magnitude) * dir;
+                int n = lengths.Count;
+                joint_positions[n] = joint_positions[n - 1] + (lengths[n - 1] / dir.magnitude) * dir;
                 {
-                    Joint j = joints[lengths.Count];
-                    Quaternion q = constrain_spin(dir, joint_rotations[lengths.Count - 1], j);
-                    dir = get_direction(joint_positions[lengths.Count], target.position, q, j);
-                    joint_rotations[lengths.Count] = reorient(dir, q);
+                    j = joints[n];
+                    q = constrain_spin(reorient(joint_rotations[n], dir), joint_rotations[n - 1], dir, j);
+                    dir = get_direction(joint_positions[n], target.position, q, j);
+                    joint_rotations[n] = reorient(q, dir);
                 }
 
-                dif = Math.Abs(Vector3.Distance(joint_positions[lengths.Count], target.position));
+                dif = Math.Abs(Vector3.Distance(joint_positions[n], target.position));
                 ++num_loops;
                 if (num_loops > 100)
                 {
@@ -157,20 +166,26 @@ public class InverseKinematics : MonoBehaviour
     }
 
     //Reorients an existing global orientation to point in a specific direction
-    private Quaternion reorient(Vector3 dir, Quaternion rot)
+    private Quaternion reorient(Quaternion rot, Vector3 dir)
     {
         return Quaternion.FromToRotation(rot * Vector3.right, dir) * rot;
     }
 
-    private Quaternion constrain_spin(Vector3 axis, Quaternion rot, Joint j)
+    //Find the relative angle between parent and child around the axis, clamp it according to joint constraints, and return result of rotating parent by this angle
+    //Assumes parent and child are both pointing in the axis direction
+    //j stores the constraints of the child
+    private Quaternion constrain_spin(Quaternion child, Quaternion parent, Vector3 axis, Joint j)
     {
-        //TODO: this needs to be improved. find some way to involve previous orientation of this joint
-        //Defaulting to zero is probably what's preventing the elbow from bending correctly sometimes
-        //It's also what's stopping the hand from rotating with the target
-        return Quaternion.AngleAxis(Mathf.Clamp(0f, j.phiMin, j.phiMax), axis) * rot;
+        float angle;
+        Vector3 angle_axis;
+        (child * Quaternion.Inverse(parent)).ToAngleAxis(out angle, out angle_axis);
+        if (Vector3.Dot(axis, angle_axis) < 0f) angle = -angle;
+        return Quaternion.AngleAxis(Mathf.Clamp(angle, j.phiMin, j.phiMax), axis) * parent;
     }
 
     //Constrains the direction vector between from and to, according to the angle constraints of the joint at from
+    //rot is the temporary spin-constrained orientation of the joint at from
+    //j stores the constrains of the joint at from
     private Vector3 get_direction(Vector3 from, Vector3 to, Quaternion rot, Joint j)
     {
         Vector3 dir = to - from;
