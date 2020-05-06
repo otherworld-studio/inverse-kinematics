@@ -132,8 +132,6 @@ public class InverseKinematics : MonoBehaviour
                 }
 
                 //End effector
-                //TODO: implement a special type of constraint for the wrist/foot that tries to align with an object/the ground
-                //TODO: stop the weird hand behavior that happens because the end effector overshoots the target
                 joint_positions[lengths.Count] = joint_positions[lengths.Count - 1] + (lengths[lengths.Count - 1] / dir.magnitude) * dir;
                 {
                     Joint j = joints[lengths.Count];
@@ -166,6 +164,9 @@ public class InverseKinematics : MonoBehaviour
 
     private Quaternion constrain_spin(Vector3 axis, Quaternion rot, Joint j)
     {
+        //TODO: this needs to be improved. find some way to involve previous orientation of this joint
+        //Defaulting to zero is probably what's preventing the elbow from bending correctly sometimes
+        //It's also what's stopping the hand from rotating with the target
         return Quaternion.AngleAxis(Mathf.Clamp(0f, j.phiMin, j.phiMax), axis) * rot;
     }
 
@@ -183,6 +184,9 @@ public class InverseKinematics : MonoBehaviour
             Vector3 straight = rot * Vector3.right;
             float angle = Mathf.Clamp(Vector3.SignedAngle(straight, dir, n), j.thetaMin, j.thetaMax);
             return Quaternion.AngleAxis(angle, n) * straight;
+        } else if (j.type == JointType.end)
+        {
+            return target.rotation * Vector3.right;
         }
         return dir;
     }
