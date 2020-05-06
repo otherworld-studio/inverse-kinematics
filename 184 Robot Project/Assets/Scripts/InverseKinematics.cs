@@ -6,7 +6,8 @@ using UnityEngine;
 public enum JointType
 {
     free,
-    hinge
+    hinge,
+    end
 }
 
 public enum Axis
@@ -19,6 +20,26 @@ public enum Axis
 [Serializable]
 public struct Joint
 {
+    public Joint(Joint other, bool reverse)
+    {
+        type = other.type;
+        transform = other.transform;
+        axis = other.axis;
+        if (reverse)
+        {
+            phiMin = -other.phiMax;
+            phiMax = -other.phiMin;
+            thetaMin = -other.thetaMax;
+            thetaMax = -other.thetaMin;
+        } else
+        {
+            phiMin = other.phiMin;
+            phiMax = other.phiMax;
+            thetaMin = other.thetaMin;
+            thetaMax = other.thetaMax;
+        }
+    }
+
     public JointType type;
 
     public Transform transform;
@@ -26,8 +47,9 @@ public struct Joint
     //Constraints for orientation in degrees, from -180 to 180
     public float phiMin, phiMax;
 
-    //Axis constraint for hinge joints
+    //Hinge joints only
     public Axis axis;
+    public float thetaMin, thetaMax;//-180 to 180
 }
 
 public class InverseKinematics : MonoBehaviour
@@ -70,13 +92,12 @@ public class InverseKinematics : MonoBehaviour
         if (Math.Abs(Vector3.Distance(joint_positions[0], target.position)) >= lengths.Sum())
         {
             Vector3 dir = target.position - joint_positions[0];
-            Joint j = joints[0];
-            joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), -j.phiMax, -j.phiMin);
+            joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), joints[0]);
             for (int i = 1; i < joints.Count; ++i)
             {
                 joint_positions[i] = joint_positions[i - 1] + (lengths[i - 1] / dir.magnitude) * dir;
-                j = joints[i];
-                Quaternion q = constrain_spin(dir, joint_rotations[i - 1], j.phiMin, j.phiMax);
+                Joint j = joints[i];
+                Quaternion q = constrain_spin(dir, joint_rotations[i - 1], j);
                 dir = get_direction(joint_positions[i], target.position, q, j);
                 joint_rotations[i] = reorient(dir, q);
             }
@@ -89,43 +110,39 @@ public class InverseKinematics : MonoBehaviour
                 //First pass: end to base
                 joint_positions[lengths.Count] = target.position;
                 joint_rotations[lengths.Count] = target.rotation;
-                Joint j;
                 Vector3 dir;
                 for (int i = lengths.Count - 1; i > 0; --i)
                 {
-                    j = joints[i + 1];
-                    //TODO: direction constraints from end to base? Implement after finishing get_direction maybe, too difficult rn
-                    dir = joint_positions[i + 1] - joint_positions[i];
+                    Joint j = new Joint(joints[i + 1], true);
+                    dir = get_direction(joint_positions[i], joint_positions[i + 1], joint_rotations[i + 1], j);
                     joint_positions[i] = joint_positions[i + 1] - (lengths[i] / dir.magnitude) * dir;
-                    joint_rotations[i] = constrain_spin(dir, reorient(dir, joint_rotations[i + 1]), -j.phiMax, -j.phiMin);
+                    joint_rotations[i] = constrain_spin(dir, reorient(dir, joint_rotations[i + 1]), j);
                 }
 
                 //Second pass: base to end
                 dir = joint_positions[1] - joint_positions[0];
-                j = joints[0];
-                joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), -j.phiMax, -j.phiMin);
-                Quaternion q;
+                joint_rotations[0] = constrain_spin(dir, reorient(dir, origin.rotation), joints[0]);
                 for (int i = 1; i < lengths.Count; ++i)
                 {
                     joint_positions[i] = joint_positions[i - 1] + (lengths[i - 1] / dir.magnitude) * dir;
-                    j = joints[i];
-                    q = constrain_spin(dir, joint_rotations[i - 1], j.phiMin, j.phiMax);
+                    Joint j = joints[i];
+                    Quaternion q = constrain_spin(dir, joint_rotations[i - 1], j);
                     dir = get_direction(joint_positions[i], joint_positions[i + 1], q, j);
                     joint_rotations[i] = reorient(dir, q);
                 }
-                
+
                 //End effector
                 joint_positions[lengths.Count] = joint_positions[lengths.Count - 1] + (lengths[lengths.Count - 1] / dir.magnitude) * dir;
-                j = joints[lengths.Count];
-                q = constrain_spin(dir, joint_rotations[lengths.Count - 1], j.phiMin, j.phiMax);
-                dir = get_direction(joint_positions[lengths.Count], target.position, q, j);
-                joint_rotations[lengths.Count] = reorient(dir, q);
-                //TODO: implement a special type of constraint for the wrist/foot that tries to align with an object/the ground
-                //TODO: stop the weird hand behavior that happens because the end effector overshoots the target
+                {
+                    Joint j = joints[lengths.Count];
+                    Quaternion q = constrain_spin(dir, joint_rotations[lengths.Count - 1], j);
+                    dir = get_direction(joint_positions[lengths.Count], target.position, q, j);
+                    joint_rotations[lengths.Count] = reorient(dir, q);
+                }
 
                 dif = Math.Abs(Vector3.Distance(joint_positions[lengths.Count], target.position));
                 ++num_loops;
-                if (num_loops > 10)
+                if (num_loops > 100)
                 {
                     Debug.Log("IK took too long to converge!");
                     break;
@@ -145,23 +162,32 @@ public class InverseKinematics : MonoBehaviour
         return Quaternion.FromToRotation(rot * Vector3.right, dir) * rot;
     }
 
-    private Quaternion constrain_spin(Vector3 axis, Quaternion rot, float phiMin, float phiMax)
+    private Quaternion constrain_spin(Vector3 axis, Quaternion rot, Joint j)
     {
-        return Quaternion.AngleAxis(Mathf.Clamp(0f, phiMin, phiMax), axis) * rot;
+        //TODO: this needs to be improved. find some way to involve previous orientation of this joint
+        //Defaulting to zero is probably what's preventing the elbow from bending correctly sometimes
+        //It's also what's stopping the hand from rotating with the target
+        return Quaternion.AngleAxis(Mathf.Clamp(0f, j.phiMin, j.phiMax), axis) * rot;
     }
 
     //Constrains the direction vector between from and to, according to the angle constraints of the joint at from
     private Vector3 get_direction(Vector3 from, Vector3 to, Quaternion rot, Joint j)
     {
+        Vector3 dir = to - from;
         if (j.type == JointType.hinge)
         {
-            //n defines the plane of the joint
             Vector3 n = rot * ((j.axis == Axis.x) ? Vector3.right :
                                (j.axis == Axis.y) ? Vector3.up :
                                                     Vector3.forward);
-            //TODO
-            //return dir;
+            //Planar projection
+            dir -= Vector3.Dot(dir, n) * n;
+            Vector3 straight = rot * Vector3.right;
+            float angle = Mathf.Clamp(Vector3.SignedAngle(straight, dir, n), j.thetaMin, j.thetaMax);
+            return Quaternion.AngleAxis(angle, n) * straight;
+        } else if (j.type == JointType.end)
+        {
+            return target.rotation * Vector3.right;
         }
-        return to - from;
+        return dir;
     }
 }
