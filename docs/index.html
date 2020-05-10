@@ -15,7 +15,7 @@
     font-family: 'Source Sans Pro', sans-serif;
   }
 </style>
-<title>CS 184 Final Project Graded Milestone</title>
+<title>CS 184 Final Project: 3D Inverse Kinematics and Animation</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
 </head>
@@ -24,8 +24,38 @@
 <body>
 
   <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2020</h1>
-  <h1 align="middle">Final Project Milestone: Unity 3D Robot Animation and Control</h1>
-  <h2 align="middle">Jinwoo Park, Alex Chan, Eric McCormick, Brian Stone</h2>
+  <h1 align="middle">3D Inverse Kinematics and Animation</h1>
+  <h2 align="middle">Brian Stone, Eric McCormick, Jinwoo Park, Alex Chan</h2>
+
+  <br />
+
+  <h1 align="middle">Final Report</h1>
+
+  <h2 align="middle">Abstract</h2>
+
+  <p>We developed an inverse kinematics system in the Unity game engine for calculating joint angles of a 3D skeleton. Based on the FABRIK algorithm, our system iterates back and forth across a kinematic chain, using linear interpolation to modify each joint's position while also updating its orientation according to user-defined constraints, until the end effector converges on a target. We designed and implemented our own rotational constraint system on top of the FABRIK algorithm, and define our own set of joint types, including hinge joints. We include a convenient interface for animators to specify the properties of each joint. Finally, we implemented an animation controller which allows our skeleton model to change animations instantaneously according to user input.</p>
+
+  <h2 align="middle">Approach</h2>
+
+  <p>We chose FABRIK because TODO.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    The Unity engine allows developers to "serialize" variables for easy access in the editor.</p>
+
+  <h2 align="middle">Results</h2>
+
+  <p>TODO</p>
+
+  <h2 align="middle">References</h2>
+
+  <p>Aristidou, A., & Lasenby, J. (2011). FABRIK: A fast, iterative solver for the Inverse Kinematics problem. <i>Graphical Models, 73</i> (5), 243-260. https://doi.org/10.1016/j.gmod.2011.05.003</p>
+
+  <h2 align="middle">Contributions</h2>
+
+  <p>Brian Stone: researching IK techniques, inverse kinematics and joint constraint systems and interface</p>
+
+  <br />
+
+  <h1 align="middle">Milestone</h1>
+
 
   <p>A key problem in computer animation is the kinematics of skeletons: moving joints in a way that looks realistic and satisfies specified constraints. We are building an inverse kinematics analytic solver to calculate joint positions and angles solely from the location of the end effector. This problem is difficult because there may be multiple solutions or none at all, and determining which of these solutions are realistic to our eyes and also physically accurate is a challenge in itself. We hope to research this problem, and the techniques others have used to solve it, with a system modeled in the Unity 3D engine.
   For our current implementation, we chose to use FABRIK (Forward And Backward Reaching Inverse Kinematics): http://www.andreasaristidou.com/publications/papers/CUEDF-INFENG,%20TR-632.pdf.<br />&nbsp;&nbsp;&nbsp;&nbsp;
