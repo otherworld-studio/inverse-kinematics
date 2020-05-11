@@ -18,7 +18,7 @@ public enum Axis
 }
 
 [Serializable]
-public class Joint
+public struct Joint
 {
     public Joint(Joint other, bool reverse)
     {
@@ -60,6 +60,9 @@ public class InverseKinematics : MonoBehaviour
     [SerializeField]
     private List<Joint> joints;
 
+    //[SerializeField]
+    //private Transform pointer;
+
     [SerializeField]
     private Transform target;
 
@@ -75,14 +78,17 @@ public class InverseKinematics : MonoBehaviour
         local_alignments = new List<Vector3>();
 
         origin_alignment = (joints[0].transform.position - origin.position).normalized;
+        Vector3 dir;
         for (int i = 0; i < joints.Count - 1; ++i)
         {
-            Vector3 dir = joints[i + 1].transform.position - joints[i].transform.position;
+            dir = joints[i + 1].transform.position - joints[i].transform.position;
             float norm = dir.magnitude;
             lengths.Add(norm);
             local_alignments.Add(joints[i].transform.InverseTransformDirection(dir / norm));
         }
-        local_alignments.Add(local_alignments[local_alignments.Count - 2]);//quick fix to skip the wonky joint in left arm
+        //dir = pointer.position - joints[joints.Count - 1].transform.position;
+        //local_alignments.Add(joints[joints.Count - 1].transform.InverseTransformDirection(dir.normalized));
+        local_alignments.Add(Vector3.left);
     }
 
     void Update()
@@ -151,7 +157,7 @@ public class InverseKinematics : MonoBehaviour
             joint_rotations[n] = reorient(q, dir, local_alignments[n]);
 
             //TODO: quick fix to make hand rotate with target
-            joint_rotations[n] = target.rotation;
+            //joint_rotations[n] = target.rotation;
 
             dif = Math.Abs(Vector3.Distance(joint_positions[n], target.position));
             ++num_loops;
