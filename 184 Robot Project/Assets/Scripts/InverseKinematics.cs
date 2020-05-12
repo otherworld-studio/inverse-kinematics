@@ -162,7 +162,7 @@ public class InverseKinematics : MonoBehaviour
             joint_rotations[n] = reorient(q, dir, local_alignments[n]);
 
             //TODO: quick fix to make hand rotate with target
-            //joint_rotations[n] = target.rotation;
+            joint_rotations[n] = target.rotation;
 
             dif = Math.Abs(Vector3.Distance(joint_positions[n], target.position));
             ++num_loops;
@@ -195,11 +195,12 @@ public class InverseKinematics : MonoBehaviour
         return Quaternion.AngleAxis(Mathf.Clamp(angle, j.phiMin, j.phiMax), axis) * parent;
     }
 
-    private Quaternion adjust_for_alignment(Quaternion rot, Vector3 from, Vector3 to) {
-        return rot * Quaternion.FromToRotation(from, to);
+    //Adjust parent rotation to account for difference in intrinsic alignment
+    private Quaternion adjust_for_alignment(Quaternion rot, Vector3 child, Vector3 parent) {
+        return rot * Quaternion.FromToRotation(child, parent);
     }
 
-    //Constrains the direction vector between from and to, according to the angle constraints of the joint at from
+    //Constrains the direction vector between from and to, according to the angle constraints of the joint j at from
     private Vector3 get_direction(Vector3 from, Vector3 to, Quaternion rot, Joint j, Vector3 align)
     {
         Vector3 dir = to - from;
