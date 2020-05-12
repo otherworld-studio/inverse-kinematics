@@ -1252,10 +1252,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7555916461887714186}
   - component: {fileID: 2093312987716390417}
-  - component: {fileID: 6811509880994726292}
-  - component: {fileID: 6811509880994726295}
   m_Layer: 0
-  m_Name: Robot Kyle
+  m_Name: brian_robot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1292,78 +1290,6 @@ Animation:
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
   m_CullingType: 1
---- !u!114 &6811509880994726292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6811509880994726297}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  origin: {fileID: 4143994309433948845}
-  joints:
-  - type: 0
-    transform: {fileID: 9083540821656313966}
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-  - type: 1
-    transform: {fileID: 8290061123350439696}
-    phiMin: 90
-    phiMax: 90
-    axis: 2
-    thetaMin: -180
-    thetaMax: 0
-  - type: 2
-    transform: {fileID: 3540979020071752290}
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-  target: {fileID: 0}
---- !u!114 &6811509880994726295
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6811509880994726297}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  origin: {fileID: 461688036303952885}
-  joints:
-  - type: 0
-    transform: {fileID: 6709513643419376399}
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-  - type: 1
-    transform: {fileID: 4607411542886174655}
-    phiMin: 0
-    phiMax: 0
-    axis: 2
-    thetaMin: -180
-    thetaMax: 180
-  - type: 2
-    transform: {fileID: 4305515862227634881}
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-  target: {fileID: 0}
 --- !u!1 &7423051752032042739
 GameObject:
   m_ObjectHideFlags: 0
