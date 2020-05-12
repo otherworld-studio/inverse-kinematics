@@ -60,8 +60,8 @@ public class InverseKinematics : MonoBehaviour
     [SerializeField]
     private List<Joint> joints;
 
-    //[SerializeField]
-    //private Transform pointer;
+    [SerializeField]
+    private Transform pointer;
 
     [SerializeField]
     private Transform target;
@@ -86,9 +86,9 @@ public class InverseKinematics : MonoBehaviour
             lengths.Add(norm);
             local_alignments.Add(joints[i].transform.InverseTransformDirection(dir / norm));
         }
-        //dir = pointer.position - joints[joints.Count - 1].transform.position;
-        //local_alignments.Add(joints[joints.Count - 1].transform.InverseTransformDirection(dir.normalized));
-        local_alignments.Add(Vector3.left);
+        dir = pointer.position - joints[joints.Count - 1].transform.position;
+        local_alignments.Add(joints[joints.Count - 1].transform.InverseTransformDirection(dir.normalized));
+        //local_alignments.Add(Vector3.left);
     }
 
     void Update()
@@ -115,6 +115,7 @@ public class InverseKinematics : MonoBehaviour
             joint_rotations[lengths.Count] = target.rotation;
             Vector3 dir;
             Joint j;
+            Quaternion temp;
             for (int i = lengths.Count - 1; i > 0; --i)
             {
                 j = new Joint(joints[i + 1], true);
@@ -122,7 +123,8 @@ public class InverseKinematics : MonoBehaviour
                 joint_positions[i] = joint_positions[i + 1] - (lengths[i] / dir.magnitude) * dir;
                 Vector3 align0 = local_alignments[i];
                 Vector3 align1 = local_alignments[i + 1];
-                joint_rotations[i] = constrain_spin(reorient(joint_rotations[i], dir, align0), reorient(joint_rotations[i + 1], dir, align1), dir, j);
+                temp = adjust_for_alignment(joint_rotations[i + 1], align0, align1);
+                joint_rotations[i] = constrain_spin(reorient(joint_rotations[i], dir, align0), reorient(temp, dir, align1), dir, j);
             }
 
             //Second pass: base to end
@@ -137,13 +139,15 @@ public class InverseKinematics : MonoBehaviour
             */
             
             dir = joint_positions[1] - joint_positions[0];
-            joint_rotations[0] = constrain_spin(joint_rotations[0], reorient(origin.rotation, dir, origin_alignment), dir, joints[0]);
+            temp = adjust_for_alignment(origin.rotation, local_alignments[0], origin_alignment);
+            joint_rotations[0] = constrain_spin(joint_rotations[0], reorient(temp, dir, local_alignments[0]), dir, joints[0]);
             Quaternion q;
             for (int i = 1; i < lengths.Count; ++i)
             {
                 joint_positions[i] = joint_positions[i - 1] + (lengths[i - 1] / dir.magnitude) * dir;
                 j = joints[i];
-                q = constrain_spin(reorient(joint_rotations[i], dir, local_alignments[i]), joint_rotations[i - 1], dir, j);
+                temp = adjust_for_alignment(joint_rotations[i - 1], local_alignments[i], local_alignments[i - 1]);
+                q = constrain_spin(reorient(joint_rotations[i], dir, local_alignments[i]), temp, dir, j);
                 dir = get_direction(joint_positions[i], joint_positions[i + 1], q, j, local_alignments[i]);
                 joint_rotations[i] = reorient(q, dir, local_alignments[i]);
             }
@@ -152,7 +156,8 @@ public class InverseKinematics : MonoBehaviour
             int n = lengths.Count;
             joint_positions[n] = joint_positions[n - 1] + (lengths[n - 1] / dir.magnitude) * dir;
             j = joints[n];
-            q = constrain_spin(reorient(joint_rotations[n], dir, local_alignments[n]), joint_rotations[n - 1], dir, j);
+            temp = adjust_for_alignment(joint_rotations[n - 1], local_alignments[n], local_alignments[n - 1]);
+            q = constrain_spin(reorient(joint_rotations[n], dir, local_alignments[n]), temp, dir, j);
             dir = get_direction(joint_positions[n], target.position, q, j, local_alignments[n]);
             joint_rotations[n] = reorient(q, dir, local_alignments[n]);
 
@@ -180,6 +185,7 @@ public class InverseKinematics : MonoBehaviour
         return Quaternion.FromToRotation(rot * align, dir) * rot;
     }
 
+    //Assumes both orientations are both already pointing along axis
     private Quaternion constrain_spin(Quaternion child, Quaternion parent, Vector3 axis, Joint j)
     {
         float angle;
@@ -187,6 +193,10 @@ public class InverseKinematics : MonoBehaviour
         (child * Quaternion.Inverse(parent)).ToAngleAxis(out angle, out angle_axis);
         if (Vector3.Dot(axis, angle_axis) < 0f) angle = -angle;
         return Quaternion.AngleAxis(Mathf.Clamp(angle, j.phiMin, j.phiMax), axis) * parent;
+    }
+
+    private Quaternion adjust_for_alignment(Quaternion rot, Vector3 from, Vector3 to) {
+        return rot * Quaternion.FromToRotation(from, to);
     }
 
     //Constrains the direction vector between from and to, according to the angle constraints of the joint at from
