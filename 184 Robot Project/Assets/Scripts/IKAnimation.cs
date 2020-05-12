@@ -50,7 +50,7 @@ public class IKAnimation : MonoBehaviour
 
         //Interpolate position and rotation
         float t = timer / keyframes[cur].duration;
-        if (keyframes[cur].smooth) {
+        if (keyframes[cur].smooth && t < 0.5f || keyframes[next].smooth && t > 0.5f) {
             t = Mathf.SmoothStep(0f, 1f, t);
         }
         Transform t0 = keyframes[cur].transform;

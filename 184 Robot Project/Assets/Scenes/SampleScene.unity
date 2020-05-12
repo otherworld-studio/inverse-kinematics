@@ -144,7 +144,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 20387177}
   m_LocalRotation: {x: -0.15852225, y: -0.70608544, z: -0.23514038, w: -0.6488629}
-  m_LocalPosition: {x: -0.119, y: 0.089, z: 0.356}
+  m_LocalPosition: {x: -0.121, y: 0.028, z: 0.141}
   m_LocalScale: {x: 1, y: 1, z: 0.96755}
   m_Children: []
   m_Father: {fileID: 0}
@@ -287,13 +287,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 267439393}
-  m_LocalRotation: {x: -0.22288299, y: -0.6641544, z: -0.25891078, w: -0.66497165}
+  m_LocalRotation: {x: -0.08077674, y: -0.695883, z: -0.115857415, w: -0.7041301}
   m_LocalPosition: {x: -0.141, y: 0.225, z: 0.51400006}
   m_LocalScale: {x: 1, y: 1, z: 0.96755}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 12
-  m_LocalEulerAnglesHint: {x: -2.7220001, y: 88.942, z: -320.125}
+  m_LocalEulerAnglesHint: {x: -2.7220001, y: 88.942, z: -343.985}
 --- !u!4 &482091352 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6709513643419376399, guid: b7c6e93154cf3de43ae93f0bfa5d5223,
@@ -725,13 +725,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1750902502}
-  m_LocalRotation: {x: -0.5124801, y: -0.47684866, z: -0.54708815, w: -0.45899248}
-  m_LocalPosition: {x: -0.103, y: 0.20899999, z: -0.262}
+  m_LocalRotation: {x: -0.4728337, y: -0.51618683, z: -0.50875515, w: -0.5011465}
+  m_LocalPosition: {x: -0.108, y: 0.373, z: -0.432}
   m_LocalScale: {x: 1, y: 1, z: 0.96755}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 14
-  m_LocalEulerAnglesHint: {x: -2.9410002, y: 88.855, z: -262.874}
+  m_LocalEulerAnglesHint: {x: -2.9410002, y: 88.855, z: -272.02}
 --- !u!1 &1755943832 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6811509880994726297, guid: b7c6e93154cf3de43ae93f0bfa5d5223,
@@ -752,7 +752,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   origin: {fileID: 244304919}
   joints:
-  - type: 1
+  - type: 0
     transform: {fileID: 482091352}
     phiMin: 0
     phiMax: 0
@@ -789,7 +789,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   origin: {fileID: 244304919}
   joints:
-  - type: 1
+  - type: 0
     transform: {fileID: 3289515810673121282}
     phiMin: -180
     phiMax: 180
@@ -947,7 +947,7 @@ MonoBehaviour:
     duration: 0.3
     smooth: 0
   keyframe_start: 2
-  timer_start: 0.12
+  timer_start: 0.11
 --- !u!1 &1889706192
 GameObject:
   m_ObjectHideFlags: 0
