@@ -131,7 +131,7 @@ public class InverseKinematics : MonoBehaviour
             
             //Buggy code from before:
             /*
-            dir = origin.rotation * Vector3.right;
+            dir = origin.rotation * origin_alignment;
             j = joints[0];
             Quaternion q = constrain_spin(reorient(joint_rotations[0], dir), origin.rotation, dir, j);
             dir = get_direction(joint_positions[0], joint_positions[1], q, j);
