@@ -48,6 +48,8 @@
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;We developed an inverse kinematics system in the Unity game engine for calculating joint angles of a 3D skeleton. Based on the FABRIK algorithm, our system iterates back and forth across a kinematic chain, using linear interpolation to modify each joint's position while also updating its orientation according to user-defined constraints, until the end effector converges on a target. This allows the user to produce smooth animations by simply manipulating targets. We also designed and implemented our own rotational constraint system on top of the FABRIK algorithm, and define our own set of joint types, including hinge joints. We include a convenient interface for animators to specify the properties of each joint, in order to create more realistic postures. Finally, we implemented an animation controller which allows our skeleton model to change animations instantaneously according to user input.</p>
 
+    <h3 align="middle">Video: https://tinyurl.com/Team5FinalVideo</h3>
+
   <h2 align="middle">Approach</h2>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;We chose FABRIK because of its relative simplicity, and on account of linear interpolation being its primary operation, which makes it very similar to problems we have dealt with previously in this class. The original paper gives a more complete description of the algorithm, but here is our own summary of basic process:<br />&nbsp;&nbsp;&nbsp;&nbsp;
@@ -55,7 +57,7 @@
 
     <div align="middle">
       <img src="images/fabrik.png" align="middle" width="480px"/>
-      <figcaption align="middle">TODO</figcaption>
+      <figcaption align="middle">A single end-to-base iteration of FABRIK (Aristidou & Lasenby, 2011, p. 246).</figcaption>
     </div>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;One of the difficulties associated with the inverse kinematics problem is the issue of multiple solutions. For any target specified, there may be many valid solutions in configuration space. We would like our system to produce solutions that are valid for the human body, or whatever type of body we are trying to animate. For example, we generally don't want a character's elbow to bend backward or the shoulder to flip upside down. Therefore, to restrict the range of possible solutions, the user may also wish to specify constraints on some of the angles and orientations of the model.<br />&nbsp;&nbsp;&nbsp;&nbsp;
@@ -67,7 +69,7 @@
 
     <div align="middle">
       <img src="images/rotation.png" align="middle" width="480px"/>
-      <figcaption align="middle">TODO</figcaption>
+      <figcaption align="middle">FABRIK, with rotational/orientational constraints applied (Aristidou & Lasenby, 2011, p. 249).</figcaption>
     </div>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;We tried to make our constraint system convenient enough that an artist/animator could implement their own joint types to fit the requirements of a particular animation. The Unity engine allows developers to "serialize" variables for easy access in the editor. We thus designed our IK interface to allow the user to easily specify specific joint types as well as angle bounds:</p>
@@ -89,7 +91,7 @@
           <tr>
             <img src="images/controller2.png" width="600px" />
           </tr>
-          <figcaption align="middle">An animation controller framework allows us to swap animations in real time.</figcaption>
+          <figcaption align="middle">An animation controller framework allows us to swap animations in real time. Above: an example of a finite state machine for transitions between animations. Below: Unity's animation controller automates interpolation between ketframes.</figcaption>
       </table>
   </div>
 
@@ -122,28 +124,28 @@
 
   <h2 align="middle">Results</h2>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;TODO: introduce handshake</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;One of the first animations we were able to produce was a simple handshake with the right arm. Observe how the elbow and shoulder both evolve smoothly with the target transform:</p>
 
     <div align="middle">
       <img src="images/handshake.gif" align="middle" width="600px"/>
-      <figcaption align="middle">TODO: cool caption here.</figcaption>
+      <figcaption align="middle">A handshake is a good way to introduce yourself.</figcaption>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;TODO: waving, switching</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;The animation controller allows us to switch between animation in real time:</p>
 
     <div align="middle">
       <img src="images/hello.gif" align="middle" width="600px"/>
-      <figcaption align="middle">TODO: cool caption here.</figcaption>
+      <figcaption align="middle">From a wave to a handshake, with the press of a button.</figcaption>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;The above animations were made using Unity’s own animation controller framework, but we also took a shot at creating our manual controller. This script stores a set of transforms as keyframes, each with a duration, as well as a Boolean indicating whether to interpolate linearly or with a smoothstep (Hermite polynomial) while near that keyframe. For example, take a look at this walking animation:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;The above animations were made using Unity’s own animation controller framework, but we also took a shot at creating our manual controller. This script stores a set of transforms as keyframes, each with a duration, as well as a Boolean indicating whether to interpolate linearly or with a smoothstep (Hermite polynomial) while near that keyframe. For example, here is a walking animation that we made with our own controller:</p>
     
     <div align="middle">
       <img src="images/walking.gif" align="middle" width="800px"/>
-      <figcaption align="middle">TODO: cool caption here.</figcaption>
+      <figcaption align="middle">An animation using our own controller.</figcaption>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;It's not as convincing as some of the other animations, but consider that this was accomplished essentially without any of Unity’s extra tools. It can certainly be refined with better constraints, better joint alignment, and/or more keyframes.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;It's not as convincing as some of the other animations, but consider that this was accomplished essentially without any of Unity’s extra tools. It contains plenty of freedom in which to develop more accurate postures; it can certainly be refined with better constraints, better joint alignment, and/or more keyframes.</p>
 
   <h2 align="middle">References</h2>
 
