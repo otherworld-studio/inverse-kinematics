@@ -65,7 +65,7 @@
     To illustrate clearly how our implementation handles constraints, let’s start in the second part of the outer loop, i.e. the base-to-end traversal. We’ve just updated our joint’s position, and now need to determine its orientation and the position of the next joint. We start by taking its prior orientation and rotating it to align it with the orientation of the previous joint. Unity has a built-in function called FromToRotation which supposedly finds the shortest such rotation, and which we use to perform this realignment. Now that both orientations are aligned with the same axis, we take the angle difference between them (around the axis) using a quaternion inverse multiplication, and clamp it according to the user-defined angle limits.<br />&nbsp;&nbsp;&nbsp;&nbsp;
     The first step, the realignment, gives us a frame of reference in which to impose our “twist” constraints in the second step. If we did not have this frame of reference, we would not have a well-defined concept of twisting. In other words, we define twist with respect to the previous segment, and therefore must realign to that axis, else we would have no other angle to compare with, and the clamp would be meaningless.<br />&nbsp;&nbsp;&nbsp;&nbsp;
     We’ve dealt with the twist (1 degree of freedom), but we still need to figure out the direction of this joint’s orientation (2 degrees of freedom), which depends on the position of the next joint. The core FABRIK algorithm would determine the next point’s position from the current point simply by interpolating in the direction of its previous position, but we need a way of restricting this direction if we are to represent special types of joints. For example, a hinge joint restricts positions to a 2D plane, so we would want to project the next point’s location onto that plane.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    So we create another function, which gets the constrained direction vector between two points, according to the “type” of the first joint, of which we’d ideally define several. So far we have only implemented the aforementioned hinge joint, but the possibility for a ball-and-socket joint is also there. For something like this, Aristidou & Lasenby propose a conic section hung in space (2011, p. 248). All one would need to do is add another entry to our JointType enumeration, and provide a corresponding switch case to the get_direction function.</p>
+    So we create another function, which gets the constrained direction vector between two points, according to the “type” of the first joint, of which we’d ideally define several. So far we have only implemented the aforementioned hinge joint (this projects the next point onto a plane by taking the vector difference between the two points and subtracting its projection onto the plane's normal), but the possibility for a ball-and-socket joint is also there. For something like this, Aristidou & Lasenby propose a conic section hung in space (2011, p. 248). All one would need to do is add another entry to our JointType enumeration, and provide a corresponding switch case to the get_direction function.</p>
 
     <div align="middle">
       <img src="images/rotation.png" align="middle" width="480px"/>
@@ -91,7 +91,7 @@
           <tr>
             <img src="images/controller2.png" width="600px" />
           </tr>
-          <figcaption align="middle">An animation controller framework allows us to swap animations in real time. Above: an example of a finite state machine for transitions between animations. Below: Unity's animation controller automates interpolation between ketframes.</figcaption>
+          <figcaption align="middle">Unity's animation controller framework allows us to swap animations in real time. Above: an example of a finite state machine for transitions between animations. Below: Unity's animation controller automates interpolation between keyframes.</figcaption>
       </table>
   </div>
 
@@ -118,20 +118,38 @@
   
   &nbsp;&nbsp;&nbsp;&nbsp;We learned at least two important lessons in the undertaking of this project:
     <ul style="list-style-type:decimal;">
-      <li>We overestimated the potential of our project in our initial proposal, and had to narrow our focus many times. Because we chose to write our own inverse kinematics system instead of using Unity's IK system, we ended up spending most of our efforts on that purpose. As game developers, we assumed that incorporating this system into a game environment would be relatively easy. However, even simple animations proved harder than we thought, partly because our IK system is not as robust as Unity's, and partly because the animation aspect of this project deviates in character from the programming aspect.</li>
-      <li>Because computer graphics is such a visually rich field, it would have paid in the long run to have thought more, and earlier, about our deliverables. Specifically, we learned that we should have spent more time thinking about how to present all of the work we've done. Most of the work on this project went into the code itself, but our system is hard to demonstrate without lots of visuals. We did our best to provide as many of these as we could in our results below.</li>
+      <li>It pays to start with a realistic scope. We overestimated the potential of our project in our initial proposal, and had to narrow our focus many times. Because we chose to write our own inverse kinematics system instead of using Unity's IK system, we ended up spending most of our efforts on that purpose. As game developers, we assumed that incorporating this system into a game environment would be relatively easy. However, even simple animations proved harder than we thought, partly because our IK system is not as robust as Unity's, and partly because the animation aspect of this project deviates in character from the programming aspect.</li>
+      <li>Because computer graphics is such a visually rich field, it would have helped us in the long run to have thought more, and earlier, about our deliverables. Specifically, we learned that we should have spent more time thinking about how to present all of the work we've done. Most of the work on this project went into the code itself, but our system is hard to demonstrate without lots of visuals. We did our best to provide as many of these as we could in our results below.</li>
   </ul>
 
   <h2 align="middle">Results</h2>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;One of the first animations we were able to produce was a simple handshake with the right arm. Observe how the elbow and shoulder both evolve smoothly with the target transform:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;We use the Space Robot Kyle asset made by Unity Technologies to demonstrate our IK system.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    At first, we didn't have a way of automating our animations, so we tested our IK system by moving the target manually. We found that imposing constraints on the configuration space of the arm limits the range of solutions to those that are feasible and that evolve smoothly into each other as we move the target:</p>
+
+    <div align="center">
+      <table width="100%">
+          <tr>
+              <td align="middle">
+                  <img src="images/no_constraints.gif" width="480px" />
+                  <figcaption align="middle">Without constraints, the algorithm can return vastly different solutions for small changes in the target.</figcaption>
+              </td>
+              <td align="middle">
+                  <img src="images/with_constraints.gif" width="480px" />
+                  <figcaption align="middle">With constraints, the range of the algorithm is reduced to a particular subset of the configuration space.</figcaption>
+              </td>
+          </tr>
+      </table>
+    </div>
+    
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;Once we had the controller working, one of the first animations we were able to produce was a simple handshake with the right arm. Observe how the elbow and shoulder both evolve smoothly with the target transform:</p>
 
     <div align="middle">
       <img src="images/handshake.gif" align="middle" width="600px"/>
-      <figcaption align="middle">A handshake is a good way to introduce yourself.</figcaption>
+      <figcaption align="middle">A handshake is a good way to introduce yourself. We contrain the elbow as a hinge; notice how it consistently bends on a plane.</figcaption>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;The animation controller allows us to switch between animation in real time:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;Unity's animation controller allows us to switch between animations in real time:</p>
 
     <div align="middle">
       <img src="images/hello.gif" align="middle" width="600px"/>
@@ -142,7 +160,7 @@
     
     <div align="middle">
       <img src="images/walking.gif" align="middle" width="800px"/>
-      <figcaption align="middle">An animation using our own controller.</figcaption>
+      <figcaption align="middle">An animation using our own custom controller.</figcaption>
     </div>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;It's not as convincing as some of the other animations, but consider that this was accomplished essentially without any of Unity’s extra tools. It contains plenty of freedom in which to develop more accurate postures; it can certainly be refined with better constraints, better joint alignment, and/or more keyframes.</p>
@@ -154,23 +172,24 @@
     <p>Blow, J. (April 2002). Inverse Kinematics with Quaternion Joint Limits. <i>The Inner Product</i>. http://number-none.com/product/IK%20with%20Quaternion%20Joint%20Limits/</p>
 
   <h2 align="middle">Contributions</h2>
+    
+    <ul style="list-style-type:square;">
+      <li>Brian Stone: IK system, constraint system and interface, IK research, custom controller and walking animation</li>
+      <li>Eric McCormick: animation controller, wave animation</li>
+      <li>Alex Chan: handshake and walking animation</li>
+      <li>Jinwoo Park: reaching animation and constraint analysis</li>
+    </ul>
 
-    <p>Brian Stone: inverse kinematics system, joint constraint system and interface, researching IK techniques</p>
+    <p>All group members contributed to the proposal, milestone and final report.</p>
 
-    <p>Eric McCormick: animation controller, wave animation</p>
-
-    <p>Alex Chan: handshake and walking animations</p>
-
-    <p>Jinwoo Park: reaching animation and constraint analysis</p>
-
-    <p>All group members contributed to the proposal, milestone and final report</p>
+    <p>Space Robot Kyle was created by Unity Technologies.</p>
 
     <br />
 
 
   <h1 align="middle">Milestone</h1>
 
-  <p>A key problem in computer animation is the kinematics of skeletons: moving joints in a way that looks realistic and satisfies specified constraints. We are building an inverse kinematics analytic solver to calculate joint positions and angles solely from the location of the end effector. This problem is difficult because there may be multiple solutions or none at all, and determining which of these solutions are realistic to our eyes and also physically accurate is a challenge in itself. We hope to research this problem, and the techniques others have used to solve it, with a system modeled in the Unity 3D engine.
+  <p>&nbsp;&nbsp;&nbsp;&nbsp;A key problem in computer animation is the kinematics of skeletons: moving joints in a way that looks realistic and satisfies specified constraints. We are building an inverse kinematics analytic solver to calculate joint positions and angles solely from the location of the end effector. This problem is difficult because there may be multiple solutions or none at all, and determining which of these solutions are realistic to our eyes and also physically accurate is a challenge in itself. We hope to research this problem, and the techniques others have used to solve it, with a system modeled in the Unity 3D engine.
   For our current implementation, we chose to use FABRIK (Forward And Backward Reaching Inverse Kinematics): http://www.andreasaristidou.com/publications/papers/CUEDF-INFENG,%20TR-632.pdf.<br />&nbsp;&nbsp;&nbsp;&nbsp;
   
   The algorithm begins by setting the end effector’s position to the target’s. It then iteratives through the joints from end effector to base, updating each’s position by linear interpolation between its current position and the previous joint’s updated position (using the fraction of this distance covered by the fixed length of the segment as the interpolation parameter). Upon reaching the base, we fix the base’s position to its original value, and then perform the same exact process in the opposite direction, from base to end effector. This entire process is repeated until the end effector’s distance from the target is within some small tolerance.<br />&nbsp;&nbsp;&nbsp;&nbsp;
@@ -181,13 +200,13 @@
     <img src="images/dislocation.png" width="600px" />
   </div>
   
-  <p>So we had to extend our algorithm to find the orientation of each joint from their positions. Now the robot’s hand follows the target transform:</p>
+  <p>&nbsp;&nbsp;&nbsp;&nbsp;So we had to extend our algorithm to find the orientation of each joint from their positions. Now the robot’s hand, elbow and shoulder move with the target transform:</p>
   
   <div align="center">
     <img src="images/wave.gif" width="600px" />
   </div>
   
-  <p>We also attempted to implement angle constraints on each joint. These constraints would be expressed ranges of rotational angles with respect to the transform of the parent joint. However, rotations in 3D are not commutative, so trying to clamp the Euler angles within these ranges has not worked. We are currently looking for other ways to solve this problem. Once it is solved, we should have all of the control we need to get our robot to make realistic poses and movements.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+  <p>&nbsp;&nbsp;&nbsp;&nbsp;We also attempted to implement angle constraints on each joint. These constraints would be expressed ranges of rotational angles with respect to the transform of the parent joint. However, rotations in 3D are not commutative, so trying to clamp the Euler angles within these ranges has not worked. We are currently looking for other ways to solve this problem. Once it is solved, we should have all of the control we need to get our robot to make realistic poses and movements.<br />&nbsp;&nbsp;&nbsp;&nbsp;
   
   We have decided that even a small game would be an unrealistic goal with the time we have left at this point. However, we are working on a small “game” environment for the robot to roam around in and show off its moves.</p>
   
