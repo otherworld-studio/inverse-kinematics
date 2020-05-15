@@ -258,12 +258,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 95.045006}
---- !u!4 &244304919 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 461688036303952885, guid: b7c6e93154cf3de43ae93f0bfa5d5223,
-    type: 3}
-  m_PrefabInstance: {fileID: 3289515810673121278}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &267439393
 GameObject:
   m_ObjectHideFlags: 0
@@ -297,12 +291,6 @@ Transform:
 --- !u!4 &482091352 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6709513643419376399, guid: b7c6e93154cf3de43ae93f0bfa5d5223,
-    type: 3}
-  m_PrefabInstance: {fileID: 3289515810673121278}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &599724578 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8420447324874881253, guid: b7c6e93154cf3de43ae93f0bfa5d5223,
     type: 3}
   m_PrefabInstance: {fileID: 3289515810673121278}
   m_PrefabAsset: {fileID: 0}
@@ -468,13 +456,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 793732700}
-  m_LocalRotation: {x: -0.6585439, y: 0.23736115, z: -0.6585102, w: 0.27630407}
-  m_LocalPosition: {x: 0.083, y: 0.02, z: -0.102}
+  m_LocalRotation: {x: -0.6962002, y: -0.07297723, z: -0.713122, w: -0.037902955}
+  m_LocalPosition: {x: 0.079, y: 0.004, z: 0.114}
   m_LocalScale: {x: 1, y: 1, z: 0.96755}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: -2.9410002, y: 88.855, z: -137.358}
+  m_LocalEulerAnglesHint: {x: -2.9410002, y: 88.855, z: -188.96799}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -666,12 +654,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 16
   m_LocalEulerAnglesHint: {x: -3.2010002, y: 88.762, z: -299.411}
---- !u!4 &1440281166 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4143994309433948845, guid: b7c6e93154cf3de43ae93f0bfa5d5223,
-    type: 3}
-  m_PrefabInstance: {fileID: 3289515810673121278}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1624525359
 GameObject:
   m_ObjectHideFlags: 0
@@ -750,12 +732,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  origin: {fileID: 244304919}
   joints:
   - type: 0
     transform: {fileID: 482091352}
-    phiMin: 0
-    phiMax: 0
+    phiMin: -180
+    phiMax: 180
     axis: 2
     thetaMin: 0
     thetaMax: 0
@@ -764,9 +745,9 @@ MonoBehaviour:
     phiMin: 0
     phiMax: 0
     axis: 2
-    thetaMin: 60
-    thetaMax: 160
-  - type: 2
+    thetaMin: 1
+    thetaMax: 179
+  - type: 0
     transform: {fileID: 684516598}
     phiMin: 0
     phiMax: 0
@@ -787,7 +768,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  origin: {fileID: 244304919}
   joints:
   - type: 0
     transform: {fileID: 3289515810673121282}
@@ -801,8 +781,8 @@ MonoBehaviour:
     phiMin: 0
     phiMax: 0
     axis: 2
-    thetaMin: -180
-    thetaMax: 0
+    thetaMin: -179
+    thetaMax: -1
   - type: 0
     transform: {fileID: 3289515810673121280}
     phiMin: 180
@@ -824,7 +804,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  origin: {fileID: 599724578}
   joints:
   - type: 0
     transform: {fileID: 43102384}
@@ -838,9 +817,9 @@ MonoBehaviour:
     phiMin: 90
     phiMax: 90
     axis: 2
-    thetaMin: -180
-    thetaMax: 0
-  - type: 2
+    thetaMin: -179
+    thetaMax: -1
+  - type: 0
     transform: {fileID: 769781100}
     phiMin: -180
     phiMax: 180
@@ -861,7 +840,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  origin: {fileID: 1440281166}
   joints:
   - type: 0
     transform: {fileID: 2060383436}
@@ -875,9 +853,9 @@ MonoBehaviour:
     phiMin: 0
     phiMax: 0
     axis: 0
-    thetaMin: -180
-    thetaMax: 0
-  - type: 2
+    thetaMin: -179
+    thetaMax: -1
+  - type: 0
     transform: {fileID: 714016060}
     phiMin: -180
     phiMax: 180
@@ -893,7 +871,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755943832}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 54f10af5db2bdbc42abd5fc2e9ecb123, type: 3}
   m_Name: 
@@ -924,7 +902,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755943832}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 54f10af5db2bdbc42abd5fc2e9ecb123, type: 3}
   m_Name: 
