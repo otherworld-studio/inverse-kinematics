@@ -110,7 +110,7 @@
       <img src="images/left_elbow.png" align="middle" width="600px"/>
     </div>
     
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;Ideally, the artist creating the model would take special care to align these transforms according to some convention. However, we couldn’t figure out how to fix these alignments in the editor, so we wanted to see if we could deal with this discrepancy in our program. Once we had our IK system working for the right arm, we then tried to generalize it by calculating every joint’s intrinsic “alignment” during runtime, and taking that into account when realigning.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;Ideally, the artist creating the model would take special care to align these transforms according to some convention. However, we couldn’t figure out how to fix these alignments in the editor, so we wanted to see if we could deal with this discrepancy in our program. Once we had our IK system working for the right arm, we then tried to generalize it by calculating every joint’s intrinsic “alignment” during runtime, and taking that into account when reorienting.<br />&nbsp;&nbsp;&nbsp;&nbsp;
     To see how this is achieved, we first note that the Unity engine represents each object’s global orientation as a rotation with respect to the world basis. For example, if you want the z-axis of an object’s local transform, you take its global orientation quaternion and multiply with the unit vector (0, 0, 1). If a joint’s “alignment,” the direction that points locally along the arm, is not guaranteed to be on any particular axis (as is the case with our robot’s left elbow), we must find the vector that multiplies with the joint’s orientation to result in this alignment direction. This process amounts to taking the direction of the next joint, and transforming it from world space to the current joint’s local space (Unity provides this operation via InverseTransformDirection). We get the actual direction of a joint by multiplying its orientation by its alignment vector.<br />&nbsp;&nbsp;&nbsp;&nbsp;
     Another problem we’ve been dealing with is the issue of how to handle joint constraints at the base (in our model, this is the hip or the shoulder). We addressed this by specifying an extra transform as the "origin" for the kinematic chain. Joint constraints for the base are defined relative to this origin.</p>
 
@@ -152,18 +152,28 @@
     <p>&nbsp;&nbsp;&nbsp;&nbsp;Unity's animation controller allows us to switch between animations in real time:</p>
 
     <div align="middle">
-      <img src="images/hello.gif" align="middle" width="600px"/>
+      <img src="images/hello.gif" align="middle" width="480px"/>
       <figcaption align="middle">From a wave to a handshake, with the press of a button.</figcaption>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;The above animations were made using Unity’s own animation controller framework, but we also took a shot at creating our manual controller. This script stores a set of transforms as keyframes, each with a duration, as well as a Boolean indicating whether to interpolate linearly or with a smoothstep (Hermite polynomial) while near that keyframe. For example, here is a walking animation that we made with our own controller:</p>
-    
-    <div align="middle">
-      <img src="images/walking.gif" align="middle" width="800px"/>
-      <figcaption align="middle">An animation using our own custom controller.</figcaption>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;The above animations were made using Unity’s own animation controller framework, but we also took a shot at creating our own simple controller. This script stores a set of transforms as keyframes, each with a duration, as well as a Boolean indicating whether to interpolate linearly or with a smoothstep (Hermite polynomial) while near that keyframe. For example, here is a walking animation that we made with our simple controller:</p>
+
+    <div align="center">
+      <table width="100%">
+          <tr>
+              <td align="middle">
+                  <img src="images/walking.gif" width="480px" />
+                  <figcaption align="middle">With appropriate constraints.</figcaption>
+              </td>
+              <td align="middle">
+                  <img src="images/walking_no_constraints.gif" width="480px" />
+                  <figcaption align="middle">Without constraints.</figcaption>
+              </td>
+          </tr>
+      </table>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;It's not as convincing as some of the other animations, but consider that this was accomplished essentially without any of Unity’s extra tools. It contains plenty of freedom in which to develop more accurate postures; it can certainly be refined with better constraints, better joint alignment, and/or more keyframes.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;This result is particularly significant because it was accomplished essentially without any of Unity’s extra tools. You can clearly see the improvement due to our constraint system; observe that the knees and right elbow always bend correctly in the constrained case unlike in the unconstrained case. This animation can certainly be refined with better constraints, better joint alignment, and/or more keyframes. Our system contains plenty of freedom in which to develop more accurate postures.</p>
 
   <h2 align="middle">References</h2>
 
@@ -174,7 +184,7 @@
   <h2 align="middle">Contributions</h2>
     
     <ul style="list-style-type:square;">
-      <li>Brian Stone: IK system, constraint system and interface, IK research, custom controller and walking animation</li>
+      <li>Brian Stone: IK system, constraint system and interface, IK research, simple controller and walking animation</li>
       <li>Eric McCormick: animation controller, wave animation</li>
       <li>Alex Chan: handshake and walking animation</li>
       <li>Jinwoo Park: reaching animation and constraint analysis</li>
@@ -184,37 +194,13 @@
 
     <p>Space Robot Kyle was created by Unity Technologies.</p>
 
-    <br />
+    </br>
 
+    <h3 align="middle">Video: https://tinyurl.com/Team5FinalVideo</h3>
 
-  <h1 align="middle">Milestone</h1>
+    <h3 align="middle">Milestone: https://brian-stone.github.io/184-final-project/milestone</h3>
 
-  <p>&nbsp;&nbsp;&nbsp;&nbsp;A key problem in computer animation is the kinematics of skeletons: moving joints in a way that looks realistic and satisfies specified constraints. We are building an inverse kinematics analytic solver to calculate joint positions and angles solely from the location of the end effector. This problem is difficult because there may be multiple solutions or none at all, and determining which of these solutions are realistic to our eyes and also physically accurate is a challenge in itself. We hope to research this problem, and the techniques others have used to solve it, with a system modeled in the Unity 3D engine.
-  For our current implementation, we chose to use FABRIK (Forward And Backward Reaching Inverse Kinematics): http://www.andreasaristidou.com/publications/papers/CUEDF-INFENG,%20TR-632.pdf.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-  
-  The algorithm begins by setting the end effector’s position to the target’s. It then iteratives through the joints from end effector to base, updating each’s position by linear interpolation between its current position and the previous joint’s updated position (using the fraction of this distance covered by the fixed length of the segment as the interpolation parameter). Upon reaching the base, we fix the base’s position to its original value, and then perform the same exact process in the opposite direction, from base to end effector. This entire process is repeated until the end effector’s distance from the target is within some small tolerance.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-  
-  On its own, this iterative algorithm consists entirely of linear interpolations and is much simpler, and supposedly faster (although we haven’t tested this), than other methods that use matrices or rotational angles, such as cyclic coordinate descent and the Jacobian inverse method. However, we ended up having to make some rotational angle calculations anyway, because of the way Unity, or maybe the particular asset we are using for the robot skeleton (Space Robot Kyle), handles hierarchical transforms. Modifying only the position of each joint did not have the desired effect:</p>
-  
-  <div align="center">
-    <img src="images/dislocation.png" width="600px" />
-  </div>
-  
-  <p>&nbsp;&nbsp;&nbsp;&nbsp;So we had to extend our algorithm to find the orientation of each joint from their positions. Now the robot’s hand, elbow and shoulder move with the target transform:</p>
-  
-  <div align="center">
-    <img src="images/wave.gif" width="600px" />
-  </div>
-  
-  <p>&nbsp;&nbsp;&nbsp;&nbsp;We also attempted to implement angle constraints on each joint. These constraints would be expressed ranges of rotational angles with respect to the transform of the parent joint. However, rotations in 3D are not commutative, so trying to clamp the Euler angles within these ranges has not worked. We are currently looking for other ways to solve this problem. Once it is solved, we should have all of the control we need to get our robot to make realistic poses and movements.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-  
-  We have decided that even a small game would be an unrealistic goal with the time we have left at this point. However, we are working on a small “game” environment for the robot to roam around in and show off its moves.</p>
-  
-  <p>Slides:<br />&nbsp;&nbsp;&nbsp;&nbsp;
-  https://docs.google.com/presentation/d/1WSBDuMqlEzRslKe-eSLp5p3IFXCTuhjTOrhIeXlNqTQ/edit?usp=sharing</p>
-  
-  <p>Video:<br />&nbsp;&nbsp;&nbsp;&nbsp;
-  https://drive.google.com/open?id=1xI4NkD-wHhgMDw_S8heHI_frKhh29FxQ</p>
+    <h3 align="middle">Proposal: https://brian-stone.github.io/184-final-project/proposal</h3>
 
 </body>
 </html>

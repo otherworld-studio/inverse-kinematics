@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184 Final Project Milestone</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2020</h1>
+<h1 align="middle">Final Project Milestone: Unity 3D Robot Animation and Control</h1>
+<h2 align="middle">Brian Stone, Eric McCormick, Alex Chan, Jinwoo Park</h2>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;A key problem in computer animation is the kinematics of skeletons: moving joints in a way that looks realistic and satisfies specified constraints. We are building an inverse kinematics analytic solver to calculate joint positions and angles solely from the location of the end effector. This problem is difficult because there may be multiple solutions or none at all, and determining which of these solutions are realistic to our eyes and also physically accurate is a challenge in itself. We hope to research this problem, and the techniques others have used to solve it, with a system modeled in the Unity 3D engine.
+  For our current implementation, we chose to use FABRIK (Forward And Backward Reaching Inverse Kinematics): http://www.andreasaristidou.com/publications/papers/CUEDF-INFENG,%20TR-632.pdf.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+  
+  The algorithm begins by setting the end effector’s position to the target’s. It then iteratives through the joints from end effector to base, updating each’s position by linear interpolation between its current position and the previous joint’s updated position (using the fraction of this distance covered by the fixed length of the segment as the interpolation parameter). Upon reaching the base, we fix the base’s position to its original value, and then perform the same exact process in the opposite direction, from base to end effector. This entire process is repeated until the end effector’s distance from the target is within some small tolerance.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+  
+  On its own, this iterative algorithm consists entirely of linear interpolations and is much simpler, and supposedly faster (although we haven’t tested this), than other methods that use matrices or rotational angles, such as cyclic coordinate descent and the Jacobian inverse method. However, we ended up having to make some rotational angle calculations anyway, because of the way Unity, or maybe the particular asset we are using for the robot skeleton (Space Robot Kyle), handles hierarchical transforms. Modifying only the position of each joint did not have the desired effect:</p>
+  
+  <div align="center">
+    <img src="images/dislocation.png" width="600px" />
+  </div>
+  
+  <p>&nbsp;&nbsp;&nbsp;&nbsp;So we had to extend our algorithm to find the orientation of each joint from their positions. Now the robot’s hand, elbow and shoulder move with the target transform:</p>
+  
+  <div align="center">
+    <img src="images/wave.gif" width="600px" />
+  </div>
+  
+  <p>&nbsp;&nbsp;&nbsp;&nbsp;We also attempted to implement angle constraints on each joint. These constraints would be expressed ranges of rotational angles with respect to the transform of the parent joint. However, rotations in 3D are not commutative, so trying to clamp the Euler angles within these ranges has not worked. We are currently looking for other ways to solve this problem. Once it is solved, we should have all of the control we need to get our robot to make realistic poses and movements.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+  
+  We have decided that even a small game would be an unrealistic goal with the time we have left at this point. However, we are working on a small “game” environment for the robot to roam around in and show off its moves.</p>
+  
+  <p>Slides:<br />&nbsp;&nbsp;&nbsp;&nbsp;
+  https://docs.google.com/presentation/d/1WSBDuMqlEzRslKe-eSLp5p3IFXCTuhjTOrhIeXlNqTQ/edit?usp=sharing</p>
+  
+  <p>Video:<br />&nbsp;&nbsp;&nbsp;&nbsp;
+  https://drive.google.com/open?id=1xI4NkD-wHhgMDw_S8heHI_frKhh29FxQ</p>
+
+</body>
+</html>

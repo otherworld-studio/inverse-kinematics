@@ -41,11 +41,11 @@ public class IKAnimation : MonoBehaviour
     void Update()
     {
         timer += Time.deltaTime;
-        if (timer > keyframes[cur].duration)
+        while (timer > keyframes[cur].duration)
         {
+            timer -= keyframes[cur].duration;
             cur = next;
             next = (next + 1) % keyframes.Count;
-            timer = 0f;
         }
 
         //Interpolate position and rotation
