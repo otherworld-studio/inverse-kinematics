@@ -10,8 +10,6 @@ using UnityEngine;
 //optimize constrain_spin by moving reorient calls outside
 //if the above step allows, move reorient into the end of get_direction/constrain_direction and make these member functions of Joint
 
-//Modify constrain_spin to keep the joint pointing in its original direction, rather than reorienting, by creating a series of transformations like a matrix diagonalization
-
 public enum JointType
 {
     free,
@@ -76,7 +74,7 @@ public class InverseKinematics : MonoBehaviour
 {
     [SerializeField]
     private Transform origin;//For the purpose of constraining the base joint
-    //If we don't use this, the end effector gradually diverges from the target as we enter a constraint trap
+    //If we don't do this, the unconstrained base twists gradually
 
     [SerializeField]
     private List<Joint> joints;
@@ -152,7 +150,7 @@ public class InverseKinematics : MonoBehaviour
             //Second pass: base to end
             j = joints[0];
             j.constrain_spin(origin_joint, j.position - origin_joint.position);
-            dir = (get_direction(j, joints[1].position) - get_direction(joints[1], j.position, true)).normalized;
+            dir = (get_direction(j, joints[1].position) - get_direction(joints[1], j.position, true)).normalized;//Vector bisector
             j.reorient(dir);
             for (int i = 1; i < joints.Count - 1; ++i)
             {
