@@ -1065,6 +1065,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   alignment_axis: 0
+  autoalign: 1
   origin: {fileID: 1364795412}
   joints:
   - transform: {fileID: 390993272}
@@ -1106,6 +1107,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   alignment_axis: 0
+  autoalign: 1
   origin: {fileID: 701142922}
   joints:
   - transform: {fileID: 1100290307}
@@ -1147,6 +1149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   alignment_axis: 0
+  autoalign: 1
   origin: {fileID: 6448526883964186395}
   joints:
   - transform: {fileID: 3570149869211136547}
@@ -1188,6 +1191,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   alignment_axis: 0
+  autoalign: 1
   origin: {fileID: 375950444}
   joints:
   - transform: {fileID: 383130481}
