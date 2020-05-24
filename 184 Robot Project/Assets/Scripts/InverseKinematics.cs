@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//TODO: rewrite everything in terms of local transformations, for ultimate optimization...? (use performance testing)
+
 public class InverseKinematics : MonoBehaviour
 {
     [SerializeField]
@@ -127,8 +129,9 @@ public class InverseKinematics : MonoBehaviour
 
             //Second pass: base to end
             j = joints[0];
+            j_prev = joints[1];
             j.constrain_spin_forward(origin.rotation);
-            dir = (j.get_direction(joints[1].position) - joints[1].get_direction(j.position, true)).normalized;//Vector bisector
+            dir = (j.get_direction(j_prev.position) - j_prev.get_direction(j.position, true)).normalized;//Vector bisector
             j.reorient(dir);
             for (int i = 1; i < joints.Count - 1; ++i)
             {
@@ -154,14 +157,14 @@ public class InverseKinematics : MonoBehaviour
             if (num_loops > 100)
             {
                 Debug.Log("IK took too long to converge!");
-                break;
+                return;
             }
         }
 
         //Update transforms
-        for (int i = 0; i < joints.Count; ++i)
+        foreach (Joint j in joints)
         {
-            joints[i].transform.rotation = joints[i].rotation;
+            j.transform.rotation = j.rotation;
         }
     }
 
@@ -244,21 +247,32 @@ public class InverseKinematics : MonoBehaviour
                 float angle = Mathf.Clamp(Vector3.SignedAngle(straight, dir, n), min, max);
                 return Quaternion.AngleAxis(angle, n) * straight;
             }
-            if (type == JointType.ball_and_socket)//TODO: untested, also no reverse case
+            if (type == JointType.ball_and_socket)
             {
                 Debug.Assert(psiMax >= 0f && psiMax < 90f);
+                float r = Mathf.Tan(psiMax);//TODO: cache this on Awake?
                 Matrix4x4 o2w = get_coord_space();
                 Matrix4x4 w2o = o2w.transpose;
                 Vector3 diro = w2o * dir;
-                diro /= diro.z;
-                float x = diro.x, y = diro.y;
-                float m = y / x;
-                float max_abs_x = Mathf.Tan(psiMax) / Mathf.Sqrt(1f + m * m);//TODO: optimize out tan(psiMax)
-                if (Mathf.Abs(x) <= max_abs_x) return dir.normalized;
+                bool right_way = (reverse && diro.z < 0f || !reverse && diro.z > 0f);//"Is dir pointing in the same approximate direction as the joint? (is their dot product positive?)"
+                float x, y;
+                float m = diro.y / diro.x;
+                if (float.IsInfinity(m) || float.IsNaN(m))
+                {
+                    if (right_way && Mathf.Abs(diro.y / diro.z) < r) return dir.normalized;
 
-                x = Mathf.Sign(x) * max_abs_x;
-                y = m * x;
-                return (o2w * new Vector3(x, y, 1f)).normalized;
+                    x = 0f;
+                    y = Mathf.Sign(diro.y) * r;
+                } else
+                {
+                    float max_abs_x = r / Mathf.Sqrt(1f + m * m);
+                    if (right_way && Mathf.Abs(diro.x / diro.z) <= max_abs_x) return dir.normalized;
+
+                    x = Mathf.Sign(diro.x) * max_abs_x;
+                    y = m * x;
+                }
+                
+                return (o2w * new Vector3(x, y, (reverse) ? -1f : 1f)).normalized;
             }
             return dir.normalized;
         }
