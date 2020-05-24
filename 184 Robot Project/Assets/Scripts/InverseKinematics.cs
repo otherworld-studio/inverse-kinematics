@@ -13,11 +13,10 @@ public class InverseKinematics : MonoBehaviour
     private bool autoalign;//Automatically align joint transforms
     //How to use:
     //1. For each joint, create a "target" transform at its exact position (this is what we do anyway, but now we don't have to worry about trying to point it at the next joint)
-    //2. Make actual joint a child of the target
+    //2. Make the actual joint a child of the target
 
     [SerializeField]
-    private Transform origin;//For the purpose of constraining the base joint
-    //If we don't do this, the unconstrained base twists gradually
+    private Transform origin;//For the purpose of constraining the base joint (an unconstrained base twists gradually)
 
     [SerializeField]
     private List<Joint> joints;
@@ -53,24 +52,10 @@ public class InverseKinematics : MonoBehaviour
                 break;
         }
 
-        Vector3 dir = joints[0].transform.position - origin.position;
-        if (autoalign)
-        {
-            Quaternion q = Quaternion.FromToRotation(dir, origin.rotation * tangent);
-            foreach (Transform child in origin)
-            {
-                child.rotation = q * child.rotation;
-            }
-            dir = joints[0].transform.position - origin.position;
-        }
-
-        float debug = Vector3.Dot(origin.rotation * tangent, dir.normalized);
-        Debug.Assert(debug > 0.99f, debug_string + " origin: " + debug);
-
         float total_length = 0f;
         for (int i = 0; i < joints.Count - 1; ++i)
         {
-            dir = joints[i + 1].transform.position - joints[i].transform.position;
+            Vector3 dir = joints[i + 1].transform.position - joints[i].transform.position;
             if (autoalign)
             {
                 Quaternion q = Quaternion.FromToRotation(dir, joints[i].transform.rotation * tangent);
@@ -81,7 +66,7 @@ public class InverseKinematics : MonoBehaviour
                 dir = joints[i + 1].transform.position - joints[i].transform.position;
             }
 
-            debug = Vector3.Dot(joints[i].transform.rotation * tangent, dir.normalized);
+            float debug = Vector3.Dot(joints[i].transform.rotation * tangent, dir.normalized);
             Debug.Assert(debug > 0.99f, debug_string + " " + i + ": " + debug);
 
             float length = Vector3.Distance(joints[i].transform.position, joints[i + 1].transform.position);
@@ -157,7 +142,7 @@ public class InverseKinematics : MonoBehaviour
             if (num_loops > 100)
             {
                 Debug.Log("IK took too long to converge!");
-                return;
+                break;
             }
         }
 
