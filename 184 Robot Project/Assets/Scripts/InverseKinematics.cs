@@ -234,30 +234,50 @@ public class InverseKinematics : MonoBehaviour
             }
             if (type == JointType.ball_and_socket)
             {
-                Debug.Assert(psiMax >= 0f && psiMax < 90f);
-                float r = Mathf.Tan(psiMax);//TODO: cache this on Awake?
                 Matrix4x4 o2w = get_coord_space();
                 Matrix4x4 w2o = o2w.transpose;
-                Vector3 diro = w2o * dir;
-                bool right_way = (reverse && diro.z < 0f || !reverse && diro.z > 0f);//"Is dir pointing in the same approximate direction as the joint? (is their dot product positive?)"
-                float x, y;
-                float m = diro.y / diro.x;
-                if (float.IsInfinity(m) || float.IsNaN(m))
-                {
-                    if (right_way && Mathf.Abs(diro.y / diro.z) < r) return dir.normalized;
+                Debug.Assert(o2w * w2o == Matrix4x4.identity);//Orthonormality check
 
-                    x = 0f;
-                    y = Mathf.Sign(diro.y) * r;
+                float x, y, z;
+
+                Debug.Assert(psiMax >= 0f && psiMax <= 180f);
+                float r = Mathf.Abs(Mathf.Tan(psiMax));//TODO: cache this on Awake?
+                bool obtuse = psiMax > 90f;
+                
+                Vector3 diro = w2o * dir;
+                bool right_way = diro.z > 0f ^ reverse;//"Is dir pointing in the same approximate direction as the joint? (is their dot product positive?)"
+                if (float.IsInfinity(r))
+                {
+                    if (right_way) return dir.normalized;
+
+                    x = diro.x;
+                    y = diro.y;
+                    z = 0f;
                 } else
                 {
-                    float max_abs_x = r / Mathf.Sqrt(1f + m * m);
-                    if (right_way && Mathf.Abs(diro.x / diro.z) <= max_abs_x) return dir.normalized;
+                    float m = diro.y / diro.x;
+                    if (float.IsInfinity(m) || float.IsNaN(m))
+                    {
+                        float y_proj = Mathf.Abs(diro.y / diro.z);
+                        if (right_way && y_proj <= r || obtuse && y_proj >= r) return dir.normalized;//TODO: test
 
-                    x = Mathf.Sign(diro.x) * max_abs_x;
-                    y = m * x;
+                        x = 0f;
+                        y = Mathf.Sign(diro.y) * r;
+                        z = (reverse ^ obtuse) ? -1f : 1f;
+                    }
+                    else
+                    {
+                        float max_abs_x = r / Mathf.Sqrt(1f + m * m);
+                        float x_proj = Mathf.Abs(diro.x / diro.z);
+                        if (right_way && x_proj <= max_abs_x || obtuse && x_proj >= max_abs_x) return dir.normalized;//TODO: test
+
+                        x = Mathf.Sign(diro.x) * max_abs_x;
+                        y = m * x;
+                        z = (reverse ^ obtuse) ? -1f : 1f;
+                    }
                 }
                 
-                return (o2w * new Vector3(x, y, (reverse) ? -1f : 1f)).normalized;
+                return (o2w * new Vector3(x, y, z)).normalized;
             }
             return dir.normalized;
         }
