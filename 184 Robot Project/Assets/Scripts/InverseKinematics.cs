@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//TODO: rewrite everything in terms of local transformations, for ultimate optimization...? (use performance testing)
+//TODO: rewrite everything in terms of local position/orientation, for ultimate optimization...? (use performance testing)
 
 public class InverseKinematics : MonoBehaviour
 {
@@ -116,7 +116,7 @@ public class InverseKinematics : MonoBehaviour
             j = joints[0];
             j_prev = joints[1];
             j.constrain_spin_forward(origin.rotation);
-            dir = (j.get_direction(j_prev.position) - j_prev.get_direction(j.position, true)).normalized;//Vector bisector
+            dir = j.constrain_direction((j_prev.position - j.position).normalized - j_prev.get_direction(j.position, true));//Constrain the vector bisector
             j.reorient(dir);
             for (int i = 1; i < joints.Count - 1; ++i)
             {
@@ -241,7 +241,7 @@ public class InverseKinematics : MonoBehaviour
                 float x, y, z;
 
                 Debug.Assert(psiMax >= 0f && psiMax <= 180f);
-                float r = Mathf.Abs(Mathf.Tan(psiMax));//TODO: cache this on Awake?
+                float r = Mathf.Abs(Mathf.Tan(psiMax * Mathf.Deg2Rad));//TODO: cache this on Awake?
                 bool obtuse = psiMax > 90f;
                 
                 Vector3 diro = w2o * dir;
@@ -259,7 +259,8 @@ public class InverseKinematics : MonoBehaviour
                     if (float.IsInfinity(m) || float.IsNaN(m))
                     {
                         float y_proj = Mathf.Abs(diro.y / diro.z);
-                        if (right_way && y_proj <= r || obtuse && y_proj >= r) return dir.normalized;//TODO: test
+                        Debug.Assert(!float.IsNaN(y_proj));
+                        if (right_way && y_proj <= r || obtuse && y_proj >= r) return dir.normalized;
 
                         x = 0f;
                         y = Mathf.Sign(diro.y) * r;
@@ -269,7 +270,8 @@ public class InverseKinematics : MonoBehaviour
                     {
                         float max_abs_x = r / Mathf.Sqrt(1f + m * m);
                         float x_proj = Mathf.Abs(diro.x / diro.z);
-                        if (right_way && x_proj <= max_abs_x || obtuse && x_proj >= max_abs_x) return dir.normalized;//TODO: test
+                        Debug.Assert(!float.IsNaN(x_proj));
+                        if (right_way && x_proj <= max_abs_x || obtuse && x_proj >= max_abs_x) return dir.normalized;
 
                         x = Mathf.Sign(diro.x) * max_abs_x;
                         y = m * x;
@@ -277,7 +279,9 @@ public class InverseKinematics : MonoBehaviour
                     }
                 }
                 
-                return (o2w * new Vector3(x, y, z)).normalized;
+                Vector3 debug = (o2w * new Vector3(x, y, z)).normalized;
+                Debug.Assert(!float.IsNaN(debug.x) && !float.IsInfinity(debug.x));
+                return debug;
             }
             return dir.normalized;
         }
