@@ -16,6 +16,9 @@ public class InverseKinematics : MonoBehaviour
     //2. Make the actual joint a child of the target
 
     [SerializeField]
+    private bool local_mode;//For testing purposes
+
+    [SerializeField]
     private Transform origin;//For the purpose of constraining the base joint (an unconstrained base twists gradually)
 
     [SerializeField]
@@ -229,6 +232,7 @@ public class InverseKinematics : MonoBehaviour
                 if (reverse) straight = -straight;
                 float min = (reverse) ? -thetaMax : thetaMin;
                 float max = (reverse) ? -thetaMin : thetaMax;
+                Debug.Assert(axis != IK.alignment_axis);
                 float angle = Mathf.Clamp(Vector3.SignedAngle(straight, dir, n), min, max);
                 return Quaternion.AngleAxis(angle, n) * straight;
             }
@@ -282,6 +286,81 @@ public class InverseKinematics : MonoBehaviour
                 Vector3 debug = (o2w * new Vector3(x, y, z)).normalized;
                 Debug.Assert(!float.IsNaN(debug.x) && !float.IsInfinity(debug.x));
                 return debug;
+            }
+            return dir.normalized;
+        }
+
+        //TODO: assume coordinates of dir are in this joint's local reference frame
+        public Vector3 constrain_direction_local(Vector3 dir, bool reverse = false)
+        {
+            if (type == JointType.hinge)
+            {
+                float min = Mathf.Deg2Rad * ((reverse) ? -thetaMax : thetaMin);
+                float max = Mathf.Deg2Rad * ((reverse) ? -thetaMin : thetaMax);
+                Debug.Assert(axis != IK.alignment_axis);
+
+                ref float a = ref dir.x, b = ref dir.y, c = ref dir.z;
+                float s = 1f;
+                switch (axis)
+                {
+                    case Axis.x:
+                        a = ref dir.x;
+                        switch (IK.alignment_axis)
+                        {
+                            case Axis.z:
+                                b = ref dir.z;
+                                c = ref dir.y;
+                                s = -1f;
+                                break;
+                        }
+                        break;
+                    case Axis.y:
+                        a = ref dir.y;
+                        switch (IK.alignment_axis)
+                        {
+                            case Axis.z:
+                                b = ref dir.z;
+                                c = ref dir.x;
+                                break;
+                            default:
+                                b = ref dir.x;
+                                s = -1f;
+                                break;
+                        }
+                        break;
+                    default:
+                        a = ref dir.z;
+                        switch (IK.alignment_axis)
+                        {
+                            case Axis.x:
+                                b = ref dir.x;
+                                c = ref dir.y;
+                                break;
+                            default:
+                                c = ref dir.x;
+                                s = -1f;
+                                break;
+                        }
+                        break;
+                }
+
+                float norm = (float)Math.Sqrt(b * b + c * c);
+                Debug.Assert(norm > 0.0001f);
+                float dot = (reverse) ? -b : b;
+                //TODO:
+                float sign = Mathf.Sign(c);
+                if (reverse) sign = -sign;
+                float angle = s * Mathf.Clamp(s * sign * Mathf.Acos(dot / norm), min, max);
+
+                a = 0f;
+                b = Mathf.Cos(angle);
+                c = Mathf.Sin(angle);
+
+                return dir;//TODO: test
+            }
+            if (type == JointType.ball_and_socket)
+            {
+                //TODO
             }
             return dir.normalized;
         }
