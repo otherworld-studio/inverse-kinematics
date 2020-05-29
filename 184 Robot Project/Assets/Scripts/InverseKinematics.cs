@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//How to use, when the joints are misaligned:
+//1. For each joint, create an IK transform at its exact position
+//2. Rotate this IK transform so that its axis corresponding to alignment_axis points toward the next joint (additionally one can use the autoalign toggle to get this as accurate as possible)
+//3. Take both the actual joint, and its children (which should include the NEXT joint for this to work), and make these direct children of the IK transform
+
 //TODO: rewrite everything in terms of local position/orientation, for ultimate optimization...? (use performance testing)
 
 public class InverseKinematics : MonoBehaviour
@@ -11,15 +16,12 @@ public class InverseKinematics : MonoBehaviour
 
     [SerializeField]
     private bool autoalign;//Automatically align joint transforms
-    //How to use:
-    //1. For each joint, create a "target" transform at its exact position (this is what we do anyway, but now we don't have to worry about trying to point it at the next joint)
-    //2. Make the actual joint a child of the target
 
     [SerializeField]
     private bool local_mode;//For testing purposes
 
     [SerializeField]
-    private Transform origin;//For the purpose of constraining the base joint (an unconstrained base twists gradually)
+    private Transform origin;//For the purpose of constraining the base joint (an unconstrained base twists gradually). Should be a parent of joints[0].
 
     [SerializeField]
     private List<Joint> joints;
@@ -61,10 +63,13 @@ public class InverseKinematics : MonoBehaviour
             Vector3 dir = joints[i + 1].transform.position - joints[i].transform.position;
             if (autoalign)
             {
-                Quaternion q = Quaternion.FromToRotation(dir, joints[i].transform.rotation * tangent);
+                float angle;
+                Vector3 axis;
+                Quaternion.FromToRotation(dir, joints[i].transform.rotation * tangent).ToAngleAxis(out angle, out axis);
+                Debug.Assert(!float.IsInfinity(axis.x));
                 foreach (Transform child in joints[i].transform)
                 {
-                    child.rotation = q * child.rotation;
+                    child.RotateAround(joints[i].transform.position, axis, angle);
                 }
                 dir = joints[i + 1].transform.position - joints[i].transform.position;
             }
@@ -89,6 +94,12 @@ public class InverseKinematics : MonoBehaviour
     }
 
     private void fabrik_solve() {
+        if (local_mode)
+        {
+            fabrik_solve_local();
+            return;
+        }
+
         //Initialize variables
         foreach (Joint j in joints)
         {
@@ -150,9 +161,81 @@ public class InverseKinematics : MonoBehaviour
         }
 
         //Update transforms
+        Quaternion q = Quaternion.Inverse(origin.rotation);
+        foreach (Joint j in joints)//TODO: fix left arm weirdness, then performance test
+        {
+            //j.transform.rotation = j.rotation;
+            j.transform.localRotation = q * j.rotation;
+            q = Quaternion.Inverse(j.rotation);
+        }
+    }
+
+    private void fabrik_solve_local()
+    {
+        //Initialize variables
         foreach (Joint j in joints)
         {
-            j.transform.rotation = j.rotation;
+            j.position = j.transform.localPosition;
+            j.rotation = j.transform.localRotation;
+        }
+
+        int num_loops = 0;
+        float dif = float.PositiveInfinity;
+        while (dif > tolerance)//TODO
+        {
+            //First pass: end to base
+            joints[joints.Count - 1].position = target.position;//TODO: convert to local
+            joints[joints.Count - 1].rotation = target.rotation;//TODO: convert to local
+
+            Joint j, j_prev;
+            Vector3 dir;
+            for (int i = joints.Count - 2; i > 0; --i)
+            {
+                j = joints[i];
+                j_prev = joints[i + 1];
+                dir = j_prev.get_direction(j.position, true);
+                j.position = j_prev.position + j.length * dir;
+                j.constrain_spin_backward(j_prev, -dir);
+            }
+
+            //Second pass: base to end
+            j = joints[0];
+            j_prev = joints[1];
+            j.constrain_spin_forward(origin.rotation);
+            dir = j.constrain_direction((j_prev.position - j.position).normalized - j_prev.get_direction(j.position, true));//Constrain the vector bisector
+            j.reorient(dir);
+            for (int i = 1; i < joints.Count - 1; ++i)
+            {
+                j = joints[i];
+                j_prev = joints[i - 1];
+                j.position = j_prev.position + j_prev.length * dir;
+                j.constrain_spin_forward(j_prev.rotation);
+                dir = j.get_direction(joints[i + 1].position);
+                j.reorient(dir);
+            }
+
+            //End effector
+            int n = joints.Count - 1;
+            j = joints[n];
+            j_prev = joints[n - 1];
+            j.position = j_prev.position + j_prev.length * dir;
+            j.constrain_spin_forward(j_prev.rotation);
+            dir = j.constrain_direction(target.rotation * tangent);
+            j.reorient(dir);
+
+            dif = Math.Abs(Vector3.Distance(j.position, target.position));
+            ++num_loops;
+            if (num_loops > 100)
+            {
+                Debug.Log("IK took too long to converge!");
+                break;
+            }
+        }
+
+        //Update transforms
+        foreach (Joint j in joints)
+        {
+            j.transform.localRotation = j.rotation;
         }
     }
 
@@ -204,7 +287,7 @@ public class InverseKinematics : MonoBehaviour
             reorient(axis);
             float angle;
             Vector3 angle_axis;
-            (rotation * Quaternion.Inverse(parent)).ToAngleAxis(out angle, out angle_axis);//This returns an infinite axis if there is no net rotation. We also get angles greater than 180 degrees sometimes
+            (rotation * Quaternion.Inverse(parent)).ToAngleAxis(out angle, out angle_axis);//This returns an infinite axis sometimes. We also get angles greater than 180 degrees sometimes
             if (angle > 180f) angle -= 360f;
             if (angle < -180f) angle += 360f;
             float debug_thing = Vector3.Dot(axis, angle_axis.normalized);
