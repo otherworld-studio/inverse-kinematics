@@ -1102,6 +1102,7 @@ MonoBehaviour:
   alignment_axis: 0
   autoalign: 0
   local_mode: 0
+  alt: 1
   origin: {fileID: 1364795412}
   joints:
   - transform: {fileID: 390993272}
@@ -1145,6 +1146,7 @@ MonoBehaviour:
   alignment_axis: 0
   autoalign: 0
   local_mode: 0
+  alt: 1
   origin: {fileID: 701142922}
   joints:
   - transform: {fileID: 1100290307}
@@ -1188,6 +1190,7 @@ MonoBehaviour:
   alignment_axis: 0
   autoalign: 0
   local_mode: 0
+  alt: 1
   origin: {fileID: 6448526883964186395}
   joints:
   - transform: {fileID: 3570149869211136547}
@@ -1216,49 +1219,6 @@ MonoBehaviour:
     psiMax: 0
   target: {fileID: 1084347799}
   debug_string: right arm
---- !u!114 &1755943836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  alignment_axis: 0
-  autoalign: 0
-  local_mode: 0
-  origin: {fileID: 375950444}
-  joints:
-  - transform: {fileID: 383130481}
-    type: 0
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
-  - transform: {fileID: 1768697186}
-    type: 1
-    phiMin: 90
-    phiMax: 90
-    axis: 2
-    thetaMin: 1
-    thetaMax: 179
-    psiMax: 0
-  - transform: {fileID: 1683683763}
-    type: 0
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
-  target: {fileID: 179701657}
-  debug_string: left arm
 --- !u!114 &1755943837
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3016,7 +2976,7 @@ GameObject:
   - component: {fileID: 1755943833}
   - component: {fileID: 1755943834}
   - component: {fileID: 1755943835}
-  - component: {fileID: 1755943836}
+  - component: {fileID: 8296172668864091753}
   - component: {fileID: 1755943837}
   - component: {fileID: 1755943838}
   - component: {fileID: 1755943839}
@@ -3044,6 +3004,7 @@ MonoBehaviour:
   alignment_axis: 0
   autoalign: 1
   local_mode: 0
+  alt: 0
   origin: {fileID: 3570149869211136547}
   joints:
   - transform: {fileID: 3736362898869390735}
@@ -3064,6 +3025,50 @@ MonoBehaviour:
     psiMax: 0
   target: {fileID: 1179543693}
   debug_string: 
+--- !u!114 &8296172668864091753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8296172668864091751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  alignment_axis: 0
+  autoalign: 0
+  local_mode: 0
+  alt: 1
+  origin: {fileID: 375950444}
+  joints:
+  - transform: {fileID: 383130481}
+    type: 0
+    phiMin: -180
+    phiMax: 180
+    axis: 0
+    thetaMin: 0
+    thetaMax: 0
+    psiMax: 0
+  - transform: {fileID: 1768697186}
+    type: 1
+    phiMin: 90
+    phiMax: 90
+    axis: 2
+    thetaMin: 0
+    thetaMax: 0
+    psiMax: 0
+  - transform: {fileID: 1683683763}
+    type: 0
+    phiMin: -180
+    phiMax: 180
+    axis: 0
+    thetaMin: 0
+    thetaMax: 0
+    psiMax: 0
+  target: {fileID: 179701657}
+  debug_string: left arm
 --- !u!4 &8519910122187727876
 Transform:
   m_ObjectHideFlags: 0
