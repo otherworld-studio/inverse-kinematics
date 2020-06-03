@@ -7,18 +7,13 @@ using UnityEngine;
 //2. Rotate this IK transform so that its axis corresponding to alignment_axis points toward the next joint (additionally one can use the autoalign toggle to get this as accurate as possible)
 //3. Take both the actual joint, and its children (which should include the NEXT joint for this to work), and make these direct children of the IK transform
 
-//TODO: rewrite everything in terms of local orientations, for ultimate optimization...? (use performance testing)
-
 public class InverseKinematics : MonoBehaviour
 {
     [SerializeField]
     private Axis alignment_axis;
 
     [SerializeField]
-    private bool autoalign;//Automatically align joint transforms
-
-    [SerializeField]
-    private bool local_mode;//For testing purposes
+    private bool autoalign;//Automatically align joint transforms\
 
     [SerializeField]
     private Transform origin;//For the purpose of constraining the base joint (an unconstrained base twists gradually). Should be a parent of joints[0].
@@ -29,12 +24,13 @@ public class InverseKinematics : MonoBehaviour
     [SerializeField]
     private Transform target;
 
-    private float tolerance;
-
-    private Vector3 tangent, normal, binormal;
-
     [SerializeField]
     private string debug_string;
+
+    private Vector3 tangent;
+    private Quaternion local_frame;
+
+    private float tolerance;
 
     void Awake()
     {
@@ -42,18 +38,14 @@ public class InverseKinematics : MonoBehaviour
         {
             case Axis.x:
                 tangent = Vector3.right;
-                normal = Vector3.up;
-                binormal = Vector3.forward;
+                local_frame = Quaternion.LookRotation(Vector3.right, Vector3.forward);
                 break;
             case Axis.y:
                 tangent = Vector3.up;
-                normal = Vector3.forward;
-                binormal = Vector3.right;
+                local_frame = Quaternion.LookRotation(Vector3.up, Vector3.right);
                 break;
             default:
                 tangent = Vector3.forward;
-                normal = Vector3.right;
-                binormal = Vector3.up;
                 break;
         }
 
@@ -94,12 +86,6 @@ public class InverseKinematics : MonoBehaviour
     }
 
     private void fabrik_solve() {
-        if (local_mode)
-        {
-            fabrik_solve_local();
-            return;
-        }
-
         //Initialize variables
         Quaternion origin_rotation = origin.rotation;
         foreach (Joint j in joints)
@@ -172,76 +158,6 @@ public class InverseKinematics : MonoBehaviour
         }
     }
 
-    private void fabrik_solve_local()//TODO
-    {
-        //Initialize variables
-        foreach (Joint j in joints)
-        {
-            j.position = j.transform.position;
-            j.rotation = j.transform.localRotation;
-        }
-
-        int num_loops = 0;
-        float dif = float.PositiveInfinity;
-        while (dif > tolerance)
-        {
-            //First pass: end to base
-            joints[joints.Count - 1].position = target.position;
-            Debug.Assert(joints.Count > 1);
-            joints[joints.Count - 1].rotation = Quaternion.Inverse(joints[joints.Count - 2].transform.rotation) * target.rotation;
-
-            Joint j, j_prev;
-            Vector3 dir;
-            for (int i = joints.Count - 2; i > 0; --i)
-            {
-                j = joints[i];
-                j_prev = joints[i + 1];
-                dir = j_prev.get_direction(j.position, true);
-                j.position = j_prev.position + j.length * dir;
-                j.constrain_spin_backward_local(j_prev);
-            }
-
-            //Second pass: base to end
-            j = joints[0];
-            j_prev = joints[1];
-            j.constrain_spin_forward_local();
-            dir = j.constrain_direction((j_prev.position - j.position).normalized - j_prev.get_direction(j.position, true));//Constrain the vector bisector
-            j.reorient(dir);
-            for (int i = 1; i < joints.Count - 1; ++i)
-            {
-                j = joints[i];
-                j_prev = joints[i - 1];
-                j.position = j_prev.position + j_prev.length * dir;
-                j.constrain_spin_forward_local();
-                dir = j.get_direction(joints[i + 1].position);
-                j.reorient(dir);
-            }
-
-            //End effector
-            int n = joints.Count - 1;
-            j = joints[n];
-            j_prev = joints[n - 1];
-            j.position = j_prev.position + j_prev.length * dir;
-            j.constrain_spin_forward_local();
-            dir = j.constrain_direction(target.rotation * tangent);
-            j.reorient(dir);
-
-            dif = Math.Abs(Vector3.Distance(j.position, target.position));
-            ++num_loops;
-            if (num_loops > 100)
-            {
-                Debug.Log("IK took too long to converge!");
-                break;
-            }
-        }
-
-        //Update transforms
-        foreach (Joint j in joints)
-        {
-            j.transform.localRotation = j.rotation;//TODO
-        }
-    }
-
     [Serializable]
     private class Joint
     {
@@ -279,20 +195,9 @@ public class InverseKinematics : MonoBehaviour
             constrain_spin(q, -other.phiMax, -other.phiMin);
         }
 
-        public void constrain_spin_backward_local(Joint other)
-        {
-            Quaternion q = Quaternion.FromToRotation(other.rotation * IK.tangent, IK.tangent) * other.rotation;
-            constrain_spin(rotation * q, -other.phiMax, -other.phiMin);
-        }
-
         public void constrain_spin_forward(Quaternion other)
         {
             constrain_spin(other, phiMin, phiMax);
-        }
-
-        public void constrain_spin_forward_local()
-        {
-            constrain_spin(Quaternion.identity, phiMin, phiMax);
         }
 
         private void constrain_spin(Quaternion other, float min, float max)
@@ -329,9 +234,6 @@ public class InverseKinematics : MonoBehaviour
                     Vector3 diro = w2o * dir;
                     ref float right = ref diro.x, up = ref diro.y, forward = ref diro.z;
 
-                    //c is the component along the hinge normal
-                    //flip_b * b is the component in the neutral direction (an angle of 0)
-                    //flip_a * a is the component along the cross product of the axes corresponding to b and c
                     ref float a = ref diro.x, b = ref diro.y, c = ref diro.z;
                     bool flip = reverse;
                     Debug.Assert(axis != IK.alignment_axis);
@@ -423,9 +325,8 @@ public class InverseKinematics : MonoBehaviour
             }
             if (type == JointType.ball_and_socket)
             {
-                Matrix4x4 o2w = get_coord_space();
-                Matrix4x4 w2o = o2w.transpose;
-                Debug.Assert(o2w * w2o == Matrix4x4.identity);//Orthonormality check
+                Quaternion o2w = local_space();
+                Quaternion w2o = Quaternion.Inverse(o2w);
 
                 float x, y, z;
 
@@ -475,9 +376,9 @@ public class InverseKinematics : MonoBehaviour
             return dir.normalized;
         }
 
-        public Matrix4x4 get_coord_space()
+        public Quaternion local_space()
         {
-            return new Matrix4x4(rotation * IK.normal, rotation * IK.binormal, rotation * IK.tangent, new Vector4(0f, 0f, 0f, 1f));
+            return rotation * IK.local_frame;
         }
 
         private enum JointType

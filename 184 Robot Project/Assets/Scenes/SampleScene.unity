@@ -1094,7 +1094,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
@@ -1102,7 +1102,6 @@ MonoBehaviour:
   alignment_axis: 0
   autoalign: 0
   local_mode: 0
-  alt: 1
   origin: {fileID: 1364795412}
   joints:
   - transform: {fileID: 390993272}
@@ -1138,7 +1137,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
@@ -1146,7 +1145,6 @@ MonoBehaviour:
   alignment_axis: 0
   autoalign: 0
   local_mode: 0
-  alt: 1
   origin: {fileID: 701142922}
   joints:
   - transform: {fileID: 1100290307}
@@ -1182,7 +1180,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
@@ -1190,7 +1188,6 @@ MonoBehaviour:
   alignment_axis: 0
   autoalign: 0
   local_mode: 0
-  alt: 1
   origin: {fileID: 6448526883964186395}
   joints:
   - transform: {fileID: 3570149869211136547}
@@ -2996,7 +2993,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
@@ -3004,7 +3001,6 @@ MonoBehaviour:
   alignment_axis: 0
   autoalign: 1
   local_mode: 0
-  alt: 0
   origin: {fileID: 3570149869211136547}
   joints:
   - transform: {fileID: 3736362898869390735}
@@ -3032,7 +3028,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
@@ -3040,7 +3036,6 @@ MonoBehaviour:
   alignment_axis: 0
   autoalign: 0
   local_mode: 0
-  alt: 1
   origin: {fileID: 375950444}
   joints:
   - transform: {fileID: 383130481}
