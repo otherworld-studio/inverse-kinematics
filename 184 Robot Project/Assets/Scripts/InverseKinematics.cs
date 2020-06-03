@@ -13,7 +13,7 @@ public class InverseKinematics : MonoBehaviour
     private Axis alignment_axis;
 
     [SerializeField]
-    private bool autoalign;//Automatically align joint transforms\
+    private bool autoalign;//Automatically align joint transforms
 
     [SerializeField]
     private Transform origin;//For the purpose of constraining the base joint (an unconstrained base twists gradually). Should be a parent of joints[0].
