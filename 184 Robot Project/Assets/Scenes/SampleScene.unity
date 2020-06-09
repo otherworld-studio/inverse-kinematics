@@ -251,6 +251,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 383130481}
+  - component: {fileID: 383130482}
   m_Layer: 0
   m_Name: Left_Upper_Arm_Joint_01_IK
   m_TagString: Untagged
@@ -274,6 +275,25 @@ Transform:
   m_Father: {fileID: 375950444}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 8.559, y: 2.753, z: 225.35199}
+--- !u!114 &383130482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 383130480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  phiMin: -180
+  phiMax: 180
+  axis: 0
+  thetaMin: -180
+  thetaMax: 180
+  psiMax: 180
 --- !u!1 &390993271
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,6 +303,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 390993272}
+  - component: {fileID: 390993273}
   m_Layer: 0
   m_Name: Right_Thigh_Joint_01_IK
   m_TagString: Untagged
@@ -306,6 +327,25 @@ Transform:
   m_Father: {fileID: 1364795412}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 3.1950002, y: 12.093, z: -169.889}
+--- !u!114 &390993273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390993271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  phiMin: -180
+  phiMax: 180
+  axis: 0
+  thetaMin: -180
+  thetaMax: 180
+  psiMax: 180
 --- !u!1 &466657413
 GameObject:
   m_ObjectHideFlags: 0
@@ -375,6 +415,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 614719054}
+  - component: {fileID: 614719055}
   m_Layer: 0
   m_Name: Left_Knee_Joint_01_IK
   m_TagString: Untagged
@@ -398,6 +439,25 @@ Transform:
   m_Father: {fileID: 1100290307}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 182.156}
+--- !u!114 &614719055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 614719053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 1
+  phiMin: 0
+  phiMax: 0
+  axis: 2
+  thetaMin: -180
+  thetaMax: 0
+  psiMax: 180
 --- !u!1 &629639175
 GameObject:
   m_ObjectHideFlags: 0
@@ -792,6 +852,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1100290307}
+  - component: {fileID: 1100290308}
   m_Layer: 0
   m_Name: Left_Thigh_Joint_01_IK
   m_TagString: Untagged
@@ -815,6 +876,25 @@ Transform:
   m_Father: {fileID: 701142922}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -0.39800003, y: 19.253, z: 345.279}
+--- !u!114 &1100290308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100290306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  phiMin: -180
+  phiMax: 180
+  axis: 0
+  thetaMin: -180
+  thetaMax: 180
+  psiMax: 180
 --- !u!1 &1146410717
 GameObject:
   m_ObjectHideFlags: 0
@@ -1035,6 +1115,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1683683763}
+  - component: {fileID: 1683683764}
   m_Layer: 0
   m_Name: Left_Wrist_Joint_01_IK
   m_TagString: Untagged
@@ -1057,6 +1138,25 @@ Transform:
   m_Father: {fileID: 1768697186}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: -0.694, y: 0.50100005, z: 234.023}
+--- !u!114 &1683683764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1683683762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  phiMin: -180
+  phiMax: 180
+  axis: 0
+  thetaMin: -180
+  thetaMax: 180
+  psiMax: 180
 --- !u!1 &1702053527
 GameObject:
   m_ObjectHideFlags: 0
@@ -1094,41 +1194,21 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   alignment_axis: 0
   autoalign: 0
-  local_mode: 0
   origin: {fileID: 1364795412}
   joints:
-  - transform: {fileID: 390993272}
-    type: 0
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
-  - transform: {fileID: 1321354937534257217}
-    type: 1
-    phiMin: 0
-    phiMax: 0
-    axis: 2
-    thetaMin: 1
-    thetaMax: 179
-    psiMax: 0
-  - transform: {fileID: 1614249022628863295}
-    type: 0
-    phiMin: 0
-    phiMax: 0
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
+  - {fileID: 390993273}
+  - {fileID: 3229363183494986762}
+  - {fileID: 3016697305749419058}
   target: {fileID: 793732701}
+  fractional_tolerance: 0.01
+  max_loops: 200
   debug_string: right leg
 --- !u!114 &1755943834
 MonoBehaviour:
@@ -1137,41 +1217,21 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   alignment_axis: 0
   autoalign: 0
-  local_mode: 0
   origin: {fileID: 701142922}
   joints:
-  - transform: {fileID: 1100290307}
-    type: 0
-    phiMin: -90
-    phiMax: 0
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
-  - transform: {fileID: 614719054}
-    type: 1
-    phiMin: 0
-    phiMax: 0
-    axis: 2
-    thetaMin: -179
-    thetaMax: -1
-    psiMax: 0
-  - transform: {fileID: 1979229297}
-    type: 0
-    phiMin: 0
-    phiMax: 0
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
+  - {fileID: 1100290308}
+  - {fileID: 614719055}
+  - {fileID: 1979229298}
   target: {fileID: 135887309}
+  fractional_tolerance: 0.01
+  max_loops: 200
   debug_string: left leg
 --- !u!114 &1755943835
 MonoBehaviour:
@@ -1180,41 +1240,21 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   alignment_axis: 0
   autoalign: 0
-  local_mode: 0
   origin: {fileID: 6448526883964186395}
   joints:
-  - transform: {fileID: 3570149869211136547}
-    type: 0
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
-  - transform: {fileID: 3736362898869390735}
-    type: 1
-    phiMin: 90
-    phiMax: 90
-    axis: 2
-    thetaMin: -179
-    thetaMax: -1
-    psiMax: 0
-  - transform: {fileID: 582480816062947948}
-    type: 0
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
+  - {fileID: 5100897738496628095}
+  - {fileID: 1111829678418077198}
+  - {fileID: 6675616617883468430}
   target: {fileID: 1084347799}
+  fractional_tolerance: 0.01
+  max_loops: 200
   debug_string: right arm
 --- !u!114 &1755943837
 MonoBehaviour:
@@ -1343,6 +1383,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1768697186}
+  - component: {fileID: 1768697187}
   m_Layer: 0
   m_Name: Left_Forearm_Joint_01_IK
   m_TagString: Untagged
@@ -1366,6 +1407,25 @@ Transform:
   m_Father: {fileID: 383130481}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: -89.29201, y: -77.074005, z: -80.721}
+--- !u!114 &1768697187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1768697185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 1
+  phiMin: 90
+  phiMax: 90
+  axis: 2
+  thetaMin: 0
+  thetaMax: 180
+  psiMax: 180
 --- !u!1 &1845427021
 GameObject:
   m_ObjectHideFlags: 0
@@ -1435,6 +1495,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1979229297}
+  - component: {fileID: 1979229298}
   m_Layer: 0
   m_Name: Left_Ankle_Joint_01_IK
   m_TagString: Untagged
@@ -1458,6 +1519,25 @@ Transform:
   m_Father: {fileID: 614719054}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: -179.79, y: -180.823, z: 75.672}
+--- !u!114 &1979229298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1979229296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  phiMin: -180
+  phiMax: 180
+  axis: 0
+  thetaMin: -180
+  thetaMax: 180
+  psiMax: 180
 --- !u!1 &2140892846
 GameObject:
   m_ObjectHideFlags: 0
@@ -1653,6 +1733,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3736362898869390735}
+  - component: {fileID: 1111829678418077198}
   m_Layer: 0
   m_Name: Right_Forearm_Joint_01
   m_TagString: Untagged
@@ -1660,6 +1741,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1111829678418077198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1111829678418077197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 1
+  phiMin: 90
+  phiMax: 90
+  axis: 2
+  thetaMin: -180
+  thetaMax: 0
+  psiMax: 180
 --- !u!1 &1121063751063810009
 GameObject:
   m_ObjectHideFlags: 0
@@ -2040,6 +2140,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1614249022628863295}
+  - component: {fileID: 3016697305749419058}
   m_Layer: 0
   m_Name: Right_Ankle_Joint_01
   m_TagString: Untagged
@@ -2047,6 +2148,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &3016697305749419058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3016697305749419057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  phiMin: -180
+  phiMax: 180
+  axis: 0
+  thetaMin: -180
+  thetaMax: 180
+  psiMax: 180
 --- !u!4 &3019434827581332936
 Transform:
   m_ObjectHideFlags: 0
@@ -2087,6 +2207,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1321354937534257217}
+  - component: {fileID: 3229363183494986762}
   m_Layer: 0
   m_Name: Right_Knee_Joint_01
   m_TagString: Untagged
@@ -2094,6 +2215,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &3229363183494986762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3229363183494986761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 1
+  phiMin: 0
+  phiMax: 0
+  axis: 2
+  thetaMin: 0
+  thetaMax: 180
+  psiMax: 180
 --- !u!1 &3232088368190159192
 GameObject:
   m_ObjectHideFlags: 0
@@ -2289,6 +2429,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3570149869211136547}
+  - component: {fileID: 5100897738496628095}
   m_Layer: 0
   m_Name: Right_Upper_Arm_Joint_01
   m_TagString: Untagged
@@ -2296,6 +2437,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &5100897738496628095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5100897738496628094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  phiMin: -180
+  phiMax: 180
+  axis: 0
+  thetaMin: -180
+  thetaMax: 180
+  psiMax: 180
 --- !u!1 &5120931691082400358
 GameObject:
   m_ObjectHideFlags: 0
@@ -2474,6 +2634,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 582480816062947948}
+  - component: {fileID: 6675616617883468430}
   m_Layer: 0
   m_Name: Right_Wrist_Joint_01
   m_TagString: Untagged
@@ -2481,6 +2642,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &6675616617883468430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6675616617883468429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98fae3b04464424e86a2b5f34ac7dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  phiMin: -180
+  phiMax: 180
+  axis: 0
+  thetaMin: -180
+  thetaMax: 180
+  psiMax: 180
 --- !u!4 &6821409277780422894
 Transform:
   m_ObjectHideFlags: 0
@@ -2993,33 +3173,20 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   alignment_axis: 0
-  autoalign: 1
-  local_mode: 0
+  autoalign: 0
   origin: {fileID: 3570149869211136547}
   joints:
-  - transform: {fileID: 3736362898869390735}
-    type: 2
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 90
-  - transform: {fileID: 582480816062947948}
-    type: 0
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
+  - {fileID: 1111829678418077198}
+  - {fileID: 6675616617883468430}
   target: {fileID: 1179543693}
+  fractional_tolerance: 0.01
+  max_loops: 200
   debug_string: 
 --- !u!114 &8296172668864091753
 MonoBehaviour:
@@ -3028,41 +3195,21 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   alignment_axis: 0
   autoalign: 0
-  local_mode: 0
   origin: {fileID: 375950444}
   joints:
-  - transform: {fileID: 383130481}
-    type: 0
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
-  - transform: {fileID: 1768697186}
-    type: 1
-    phiMin: 90
-    phiMax: 90
-    axis: 2
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
-  - transform: {fileID: 1683683763}
-    type: 0
-    phiMin: -180
-    phiMax: 180
-    axis: 0
-    thetaMin: 0
-    thetaMax: 0
-    psiMax: 0
+  - {fileID: 383130482}
+  - {fileID: 1768697187}
+  - {fileID: 1683683764}
   target: {fileID: 179701657}
+  fractional_tolerance: 0.01
+  max_loops: 200
   debug_string: left arm
 --- !u!4 &8519910122187727876
 Transform:
