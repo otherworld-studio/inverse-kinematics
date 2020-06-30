@@ -247,12 +247,17 @@ public class IKJoint : MonoBehaviour
         return dir.normalized;
     }
 
-    
-
     private enum JointType
     {
         free,
         hinge,
         ball_and_socket
+    }
+
+    private enum Axis
+    {
+        x,
+        y,
+        z
     }
 }

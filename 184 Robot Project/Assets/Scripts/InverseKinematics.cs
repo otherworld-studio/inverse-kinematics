@@ -8,13 +8,6 @@ using UnityEngine;
 //3. Assign the IKJoint script to this rotated object
 //4. Take both the actual joint, and its children (which must include the NEXT joint for this to work properly), and make these direct children of the IKJoint object
 
-public enum Axis
-{
-    x,
-    y,
-    z
-}
-
 public class InverseKinematics : MonoBehaviour
 {
     [SerializeField]
