@@ -288,9 +288,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  align_axis: 0
   phiMin: -180
   phiMax: 180
-  axis: 0
+  hinge_axis: 0
   thetaMin: -180
   thetaMax: 180
   psiMax: 180
@@ -340,9 +341,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  align_axis: 0
   phiMin: -180
   phiMax: 180
-  axis: 0
+  hinge_axis: 0
   thetaMin: -180
   thetaMax: 180
   psiMax: 180
@@ -452,9 +454,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
+  align_axis: 0
   phiMin: 0
   phiMax: 0
-  axis: 2
+  hinge_axis: 2
   thetaMin: -180
   thetaMax: 0
   psiMax: 180
@@ -889,9 +892,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  align_axis: 0
   phiMin: -180
   phiMax: 180
-  axis: 0
+  hinge_axis: 0
   thetaMin: -180
   thetaMax: 180
   psiMax: 180
@@ -925,36 +929,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 1.8830001, y: 89.04401, z: -124.24901}
---- !u!1 &1179543692
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1179543693}
-  m_Layer: 0
-  m_Name: BallSocketTarget
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1179543693
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1179543692}
-  m_LocalRotation: {x: -0.74452883, y: 0.6619887, z: 0.07215852, w: -0.047339458}
-  m_LocalPosition: {x: 0.28, y: 0.606, z: -0.051}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 23
-  m_LocalEulerAnglesHint: {x: -1.4350001, y: 189.79799, z: -96.840004}
 --- !u!1 &1266806925
 GameObject:
   m_ObjectHideFlags: 0
@@ -1151,9 +1125,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  align_axis: 0
   phiMin: -180
   phiMax: 180
-  axis: 0
+  hinge_axis: 0
   thetaMin: -180
   thetaMax: 180
   psiMax: 180
@@ -1199,7 +1174,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alignment_axis: 0
   autoalign: 0
   origin: {fileID: 1364795412}
   joints:
@@ -1222,7 +1196,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alignment_axis: 0
   autoalign: 0
   origin: {fileID: 701142922}
   joints:
@@ -1245,7 +1218,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alignment_axis: 0
   autoalign: 0
   origin: {fileID: 6448526883964186395}
   joints:
@@ -1420,9 +1392,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
+  align_axis: 0
   phiMin: 90
   phiMax: 90
-  axis: 2
+  hinge_axis: 2
   thetaMin: 0
   thetaMax: 180
   psiMax: 180
@@ -1532,9 +1505,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  align_axis: 0
   phiMin: -180
   phiMax: 180
-  axis: 0
+  hinge_axis: 0
   thetaMin: -180
   thetaMax: 180
   psiMax: 180
@@ -1754,9 +1728,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
+  align_axis: 0
   phiMin: 90
   phiMax: 90
-  axis: 2
+  hinge_axis: 0
   thetaMin: -180
   thetaMax: 0
   psiMax: 180
@@ -2161,9 +2136,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  align_axis: 0
   phiMin: -180
   phiMax: 180
-  axis: 0
+  hinge_axis: 0
   thetaMin: -180
   thetaMax: 180
   psiMax: 180
@@ -2228,9 +2204,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
+  align_axis: 0
   phiMin: 0
   phiMax: 0
-  axis: 2
+  hinge_axis: 2
   thetaMin: 0
   thetaMax: 180
   psiMax: 180
@@ -2450,9 +2427,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  align_axis: 0
   phiMin: -180
   phiMax: 180
-  axis: 0
+  hinge_axis: 0
   thetaMin: -180
   thetaMax: 180
   psiMax: 180
@@ -2655,9 +2633,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  align_axis: 0
   phiMin: -180
   phiMax: 180
-  axis: 0
+  hinge_axis: 0
   thetaMin: -180
   thetaMax: 180
   psiMax: 180
@@ -3158,7 +3137,6 @@ GameObject:
   - component: {fileID: 1755943838}
   - component: {fileID: 1755943839}
   - component: {fileID: 1755943840}
-  - component: {fileID: 8296172668864091752}
   m_Layer: 0
   m_Name: Robot Kyle
   m_TagString: Untagged
@@ -3166,28 +3144,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &8296172668864091752
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8296172668864091751}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  alignment_axis: 0
-  autoalign: 0
-  origin: {fileID: 3570149869211136547}
-  joints:
-  - {fileID: 1111829678418077198}
-  - {fileID: 6675616617883468430}
-  target: {fileID: 1179543693}
-  fractional_tolerance: 0.01
-  max_loops: 200
-  debug_string: 
 --- !u!114 &8296172668864091753
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3200,7 +3156,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4643202f4edd89e458b9e2f80b5c87ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alignment_axis: 0
   autoalign: 0
   origin: {fileID: 375950444}
   joints:

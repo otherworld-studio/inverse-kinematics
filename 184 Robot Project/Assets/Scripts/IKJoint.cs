@@ -7,13 +7,15 @@ public class IKJoint : MonoBehaviour
     [SerializeField]
     private JointType type;
     [SerializeField]
-    private float phiMin=-180f, phiMax=180f;//Constraints for orientation in degrees, from -180 to 180
+    private Axis align_axis;
     [SerializeField]
-    private Axis axis;//Normal vector of hinge plane
+    private float phiMin = -180f, phiMax = 180f; // Constraints for orientation in degrees, from -180 to 180
     [SerializeField]
-    private float thetaMin=-180f, thetaMax=180f;//hinges only
+    private Axis hinge_axis; // Normal vector of hinge plane
     [SerializeField]
-    private float psiMax=180f;//ball_and_sockets only
+    private float thetaMin = -180f, thetaMax = 180f; // hinges only
+    [SerializeField]
+    private float psiMax = 180f; // ball_and_sockets only
 
     [NonSerialized]
     public Vector3 position;
@@ -21,18 +23,39 @@ public class IKJoint : MonoBehaviour
     public Quaternion rotation;
     [NonSerialized]
     public float length;
-    [NonSerialized]
-    public InverseKinematics IK;
+
+    private Quaternion local_frame;
+    private Quaternion local_space { get { return rotation * local_frame; } }
+
+    public Vector3 tangent { get; private set; }
+
+    void Awake()
+    {
+        switch (align_axis)
+        {
+            case Axis.x:
+                tangent = Vector3.right;
+                local_frame = Quaternion.LookRotation(Vector3.right, Vector3.forward);
+                break;
+            case Axis.y:
+                tangent = Vector3.up;
+                local_frame = Quaternion.LookRotation(Vector3.up, Vector3.right);
+                break;
+            default:
+                tangent = Vector3.forward;
+                break;
+        }
+    }
 
     //Reorients to a specific direction
     public void reorient(Vector3 dir)
     {
-        rotation = Quaternion.FromToRotation(rotation * IK.tangent, dir) * rotation;
+        rotation = Quaternion.FromToRotation(rotation * tangent, dir) * rotation;
     }
 
     public void constrain_spin_backward(IKJoint other, Vector3 axis)
     {
-        Quaternion q = Quaternion.FromToRotation(other.rotation * IK.tangent, axis) * other.rotation;
+        Quaternion q = Quaternion.FromToRotation(other.rotation * tangent, axis) * other.rotation;
         constrain_spin(q, -other.phiMax, -other.phiMin);
     }
 
@@ -43,7 +66,7 @@ public class IKJoint : MonoBehaviour
 
     private void constrain_spin(Quaternion other, float min, float max)
     {
-        Vector3 axis = other * IK.tangent;
+        Vector3 axis = other * tangent;
         reorient(axis);
         float angle;
         Vector3 angle_axis;
@@ -69,7 +92,7 @@ public class IKJoint : MonoBehaviour
     {
         if (type == JointType.hinge)
         {
-            /*Alternative implementation which is somehow slower in Unity
+            /*Alternative implementation which is somehow slower in Unity? TODO: needs to be tested again since replacing Matrix4x4 with Quaternion
             Matrix4x4 o2w = get_coord_space();
             Matrix4x4 w2o = o2w.transpose;
             Debug.Assert(o2w * w2o == Matrix4x4.identity);//Orthonormality check
@@ -153,12 +176,12 @@ public class IKJoint : MonoBehaviour
             return o2w * diro;
             */
 
-            Debug.Assert(axis != IK.alignment_axis);
-            Vector3 n = rotation * ((axis == Axis.x) ? Vector3.right :
-                                    (axis == Axis.y) ? Vector3.up :
+            Debug.Assert(hinge_axis != align_axis);
+            Vector3 n = rotation * ((hinge_axis == Axis.x) ? Vector3.right :
+                                    (hinge_axis == Axis.y) ? Vector3.up :
                                                        Vector3.forward);
             dir -= Vector3.Dot(dir, n) * n;// Planar projection
-            Vector3 straight = rotation * IK.tangent;
+            Vector3 straight = rotation * tangent;
             if (reverse) straight = -straight;
             float min = (reverse) ? -thetaMax : thetaMin;
             float max = (reverse) ? -thetaMin : thetaMax;
@@ -168,7 +191,7 @@ public class IKJoint : MonoBehaviour
         }
         if (type == JointType.ball_and_socket)
         {
-            Quaternion o2w = local_space();
+            Quaternion o2w = local_space;
             Quaternion w2o = Quaternion.Inverse(o2w);
 
             float x, y, z;
@@ -220,10 +243,7 @@ public class IKJoint : MonoBehaviour
         return dir.normalized;
     }
 
-    public Quaternion local_space()
-    {
-        return rotation * IK.local_frame;
-    }
+    
 
     private enum JointType
     {

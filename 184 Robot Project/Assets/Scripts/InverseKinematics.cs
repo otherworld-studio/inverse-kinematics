@@ -17,8 +17,6 @@ public enum Axis
 
 public class InverseKinematics : MonoBehaviour
 {
-    public Axis alignment_axis;//TODO: make this, tangent and local_frame per-joint?
-
     [SerializeField]
     private bool autoalign;//Automatically align joint transforms
 
@@ -39,30 +37,10 @@ public class InverseKinematics : MonoBehaviour
     [SerializeField]
     private string debug_string;
 
-    [NonSerialized]
-    public Vector3 tangent;
-    [NonSerialized]
-    public Quaternion local_frame;
-
     private float tolerance;
 
-    void Awake()
+    void Start()
     {
-        switch(alignment_axis)
-        {
-            case Axis.x:
-                tangent = Vector3.right;
-                local_frame = Quaternion.LookRotation(Vector3.right, Vector3.forward);
-                break;
-            case Axis.y:
-                tangent = Vector3.up;
-                local_frame = Quaternion.LookRotation(Vector3.up, Vector3.right);
-                break;
-            default:
-                tangent = Vector3.forward;
-                break;
-        }
-
         float total_length = 0f;
         for (int i = 0; i < joints.Count - 1; ++i)
         {
@@ -71,7 +49,7 @@ public class InverseKinematics : MonoBehaviour
             {
                 float angle;
                 Vector3 axis;
-                Quaternion.FromToRotation(dir, joints[i].transform.rotation * tangent).ToAngleAxis(out angle, out axis);
+                Quaternion.FromToRotation(dir, joints[i].transform.rotation * joints[i].tangent).ToAngleAxis(out angle, out axis);
                 Debug.Assert(!float.IsInfinity(axis.x));
                 foreach (Transform child in joints[i].transform)
                 {
@@ -80,16 +58,14 @@ public class InverseKinematics : MonoBehaviour
                 dir = joints[i + 1].transform.position - joints[i].transform.position;
             }
 
-            float debug = Vector3.Dot(joints[i].transform.rotation * tangent, dir.normalized);
+            float debug = Vector3.Dot(joints[i].transform.rotation * joints[i].tangent, dir.normalized);
             Debug.Assert(debug > 0.99f, debug_string + " " + i + ": " + debug);
 
             float length = Vector3.Distance(joints[i].transform.position, joints[i + 1].transform.position);
             joints[i].length = length;
-            joints[i].IK = this;
             total_length += length;
         }
         joints[joints.Count - 1].length = 0f;
-        joints[joints.Count - 1].IK = this;
 
         tolerance = fractional_tolerance * total_length;
     }
@@ -149,7 +125,7 @@ public class InverseKinematics : MonoBehaviour
             j_prev = joints[n - 1];
             j.position = j_prev.position + j_prev.length * dir;
             j.constrain_spin_forward(j_prev.rotation);
-            dir = j.constrain_direction(target.rotation * tangent);
+            dir = j.constrain_direction(target.rotation * j.tangent);
             j.reorient(dir);
 
             dif = Math.Abs(Vector3.Distance(j.position, target.position));
