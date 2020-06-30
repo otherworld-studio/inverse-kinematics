@@ -1731,7 +1731,7 @@ MonoBehaviour:
   align_axis: 0
   phiMin: 90
   phiMax: 90
-  hinge_axis: 0
+  hinge_axis: 2
   thetaMin: -180
   thetaMax: 0
   psiMax: 180

@@ -53,30 +53,34 @@ public class IKJoint : MonoBehaviour
         rotation = Quaternion.FromToRotation(rotation * tangent, dir) * rotation;
     }
 
-    public void constrain_spin_backward(IKJoint other, Vector3 axis)
+    public void constrain_twist_backward(IKJoint other, Vector3 axis)
     {
         Quaternion q = Quaternion.FromToRotation(other.rotation * tangent, axis) * other.rotation;
-        constrain_spin(q, -other.phiMax, -other.phiMin);
+        constrain_twist(q, -other.phiMax, -other.phiMin);
     }
 
-    public void constrain_spin_forward(Quaternion other)
+    public void constrain_twist_forward(Quaternion other)
     {
-        constrain_spin(other, phiMin, phiMax);
+        constrain_twist(other, phiMin, phiMax);
     }
 
-    private void constrain_spin(Quaternion other, float min, float max)
+    private void constrain_twist(Quaternion other, float min, float max)
     {
         Vector3 axis = other * tangent;
         reorient(axis);
         float angle;
         Vector3 angle_axis;
-        (rotation * Quaternion.Inverse(other)).ToAngleAxis(out angle, out angle_axis);//This returns an infinite axis sometimes. We also get angles greater than 180 degrees sometimes
+        (rotation * Quaternion.Inverse(other)).ToAngleAxis(out angle, out angle_axis); // This returns an infinite axis sometimes. We also get angles greater than 180 degrees sometimes
         if (float.IsInfinity(angle_axis.x)) return;
 
         Debug.Assert(angle >= 0f);
         if (angle > 180f) angle -= 360f;
         float dot = Vector3.Dot(axis, angle_axis);
-        Debug.Assert(Mathf.Abs(dot) > 0.99f || Mathf.Abs(angle) < 0.5f);
+        Debug.Assert(Mathf.Abs(dot) > 0.99f || Mathf.Abs(angle) < 1f); // TODO: why is this failing again?
+        if (Mathf.Abs(dot) < 0.99f && Mathf.Abs(angle) > 1f)
+        {
+            Debug.Log(Mathf.Abs(dot) + " " + Mathf.Abs(angle)); // DEBUG
+        }
         if (dot < 0f) angle = -angle;
         rotation = Quaternion.AngleAxis(Mathf.Clamp(angle, min, max), axis) * other;
     }

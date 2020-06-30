@@ -100,13 +100,13 @@ public class InverseKinematics : MonoBehaviour
                 j_prev = joints[i + 1];
                 dir = j_prev.get_direction(j.position, true);
                 j.position = j_prev.position + j.length * dir;
-                j.constrain_spin_backward(j_prev, -dir);
+                j.constrain_twist_backward(j_prev, -dir);
             }
 
             //Second pass: base to end
             j = joints[0];
             j_prev = joints[1];
-            j.constrain_spin_forward(origin_rotation);
+            j.constrain_twist_forward(origin_rotation);
             dir = j.constrain_direction((j_prev.position - j.position).normalized - j_prev.get_direction(j.position, true));//Constrain the vector bisector
             j.reorient(dir);
             for (int i = 1; i < joints.Count - 1; ++i)
@@ -114,7 +114,7 @@ public class InverseKinematics : MonoBehaviour
                 j = joints[i];
                 j_prev = joints[i - 1];
                 j.position = j_prev.position + j_prev.length * dir;
-                j.constrain_spin_forward(j_prev.rotation);
+                j.constrain_twist_forward(j_prev.rotation);
                 dir = j.get_direction(joints[i + 1].position);
                 j.reorient(dir);
             }
@@ -124,14 +124,14 @@ public class InverseKinematics : MonoBehaviour
             j = joints[n];
             j_prev = joints[n - 1];
             j.position = j_prev.position + j_prev.length * dir;
-            j.constrain_spin_forward(j_prev.rotation);
+            j.constrain_twist_forward(j_prev.rotation);
             dir = j.constrain_direction(target.rotation * j.tangent);
             j.reorient(dir);
 
             dif = Math.Abs(Vector3.Distance(j.position, target.position));
             if (++num_loops > max_loops)
             {
-                Debug.Log("IK took too long to converge!");
+                Debug.Log("IK took too long to converge! (" + debug_string + ")");
                 break;
             }
         }
