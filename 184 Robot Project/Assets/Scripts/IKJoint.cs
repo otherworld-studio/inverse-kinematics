@@ -17,6 +17,7 @@ public class IKJoint : MonoBehaviour
     [SerializeField]
     private float psiMax = 180f; // ball_and_sockets only
 
+    // Variables to be initialized and modified by the animation controlling this joint
     [NonSerialized]
     public Vector3 position;
     [NonSerialized]
@@ -24,6 +25,7 @@ public class IKJoint : MonoBehaviour
     [NonSerialized]
     public float length;
 
+    // Determined by align_axis, set permanently in Awake()
     private Quaternion local_frame;
     private Quaternion local_space { get { return rotation * local_frame; } }
 
