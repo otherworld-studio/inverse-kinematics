@@ -14,6 +14,9 @@
   h1, h2, h3, h4 {
     font-family: 'Source Sans Pro', sans-serif;
   }
+  td {
+    vertical-align: baseline;
+  }
 </style>
 <title>CS 184 Final Project: 3D Inverse Kinematics and Animation</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -111,12 +114,12 @@
       <table width="100%">
           <tr>
               <td align="middle">
-                  <img src="images/no_constraints.gif" width="480px" />
-                  <figcaption align="middle">TODO Without constraints, the robot's shoulder tends to strike unnatural orientations.</figcaption>
+                  <img src="images/no_constraints.png" width="480px" />
+                  <figcaption align="middle">Without constraints, the robot's elbow tends to strike unnatural orientations.</figcaption>
               </td>
               <td align="middle">
-                  <img src="images/with_constraints.gif" width="480px" />
-                  <figcaption align="middle">TODO We can constrain the shoulder's orientation to a particular range of configuration space. This range is expressed as a pair of angles with respect to the root transform.</figcaption>
+                  <img src="images/yes_constraints.png" width="480px" />
+                  <figcaption align="middle">We can constrain the elbow's direction to a particular range of configuration space, expressed as a local axis defining the plane, and a pair of angles with respect to the direction of the shoulder.</figcaption>
               </td>
           </tr>
       </table>
@@ -146,7 +149,7 @@
       </table>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;This result is particularly significant because it was accomplished essentially without any of Unity’s extra tools. You can also clearly see the improvement due to the constraint system; observe that the knees and right elbow always bend correctly in the constrained case unlike in the unconstrained case. This animation can certainly be refined with better constraints, better joint alignment, and/or more keyframes. The system contains plenty of freedom in which to develop more accurate postures.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;This result is particularly significant because it was accomplished essentially without any of Unity’s extra tools. You can also clearly see the improvement due to the constraint system; observe that the knees and right elbow always bend correctly in the constrained case unlike in the unconstrained case. The system contains plenty of freedom in which to develop more accurate postures; this animation can certainly be refined with better constraints, better joint alignment, and/or more keyframes.</p>
 
   <h1 align="middle">References</h1>
 
