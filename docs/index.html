@@ -14,6 +14,9 @@
   h1, h2, h3, h4 {
     font-family: 'Source Sans Pro', sans-serif;
   }
+  td {
+    vertical-align: baseline;
+  }
 </style>
 <title>CS 184 Final Project: 3D Inverse Kinematics and Animation</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -30,7 +33,7 @@
                 <img src="images/handshake.gif" width="480px" />
             </td>
             <td align="middle">
-                <img src="images/reach.gif" width="480px" />
+                <img src="images/cylinder.gif" width="480px" />
             </td>
         </tr>
     </table>
@@ -38,70 +41,58 @@
 
   <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2020</h1>
   <h1 align="middle">3D Inverse Kinematics and Animation</h1>
-  <h2 align="middle">Brian Stone, Eric McCormick, Jinwoo Park, Alex Chan</h2>
+  <h2 align="middle">Brian Stone</h2>
 
   <br />
 
-  <h1 align="middle">Final Report</h1>
+  <h1 align="middle">Abstract</h1>
 
-  <h2 align="middle">Abstract</h2>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;I developed an inverse kinematics system in the Unity game engine for calculating joint angles of a 3D skeleton. Based on the FABRIK algorithm, this system iterates back and forth across a kinematic chain, using linear interpolation to modify each joint's position while also updating its orientation according to user-defined constraints, until the end effector converges on a target. This allows the user to produce smooth animations by simply manipulating targets. I designed and implemented a rotational constraint system on top of the FABRIK algorithm, and define a set of specialized joint types, including hinge joints and ball-and-socket joints. I provide a convenient interface for animators to specify the properties of each joint, in order to create more realistic postures.</p>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;We developed an inverse kinematics system in the Unity game engine for calculating joint angles of a 3D skeleton. Based on the FABRIK algorithm, our system iterates back and forth across a kinematic chain, using linear interpolation to modify each joint's position while also updating its orientation according to user-defined constraints, until the end effector converges on a target. This allows the user to produce smooth animations by simply manipulating targets. We also designed and implemented our own rotational constraint system on top of the FABRIK algorithm, and define our own set of joint types, including hinge joints. We include a convenient interface for animators to specify the properties of each joint, in order to create more realistic postures. Finally, we implemented an animation controller which allows our skeleton model to change animations instantaneously according to user input.</p>
+  <h1 align="middle">Approach</h1>
 
-    <h3 align="middle">Video: https://tinyurl.com/Team5FinalVideo</h3>
-
-  <h2 align="middle">Approach</h2>
-
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;We chose FABRIK because of its relative simplicity, and on account of linear interpolation being its primary operation, which makes it very similar to problems we have dealt with previously in this class. The original paper gives a more complete description of the algorithm, but here is our own summary of basic process:<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    First, the transform (position and orientation) of the end effector (the hand, foot, etc.) is initialized to a target transform. Then, we iterate down the kinematic chain towards the base, updating each joint's position by interpolating between its previous position and the previous joint's current position. The interpolation parameter is chosen such that the distance between each adjacent pair of joints is fixed, in order to prevent unrealistic stretching or contracting. Once we reach the base, we repeat the process in the opposite direction. We continue to traverse back and forth until the end effector converges on the target.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;I chose FABRIK because of its relative simplicity, and on account of linear interpolation being its primary operation, which makes it very similar to many problems covered in this class. The original paper gives a more complete description of the algorithm, but here is my own summary of the basic process:<br />&nbsp;&nbsp;&nbsp;&nbsp;
+      <ul style="list-style-type:decimal;">
+        <li>Initialize the transform (position and orientation) of the end effector (the hand, foot, etc.) to a user-specified target transform.</li>
+        <li>Iterate down the kinematic chain towards the base, updating each joint's position by interpolating between its previous position and the previous joint's current position. The interpolation parameter is chosen such that the distance between each adjacent pair of joints is fixed, in order to prevent unrealistic stretching or contracting.</li>
+        <li>Once the base is reached, repeat the process in the opposite direction.</li>
+        <li>Continue to traverse back and forth until the end effector converges on the target.</li>
+      </ul></p>
 
     <div align="middle">
       <img src="images/fabrik.png" align="middle" width="480px"/>
-      <figcaption align="middle">A single end-to-base iteration of FABRIK (Aristidou & Lasenby, 2011, p. 246).</figcaption>
+      <figcaption align="middle">A single end-to-base iteration of FABRIK (Aristidou & Lasenby, 2011, p. 246)</figcaption>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;One of the difficulties associated with the inverse kinematics problem is the issue of multiple solutions. For any target specified, there may be many valid solutions in configuration space. We would like our system to produce solutions that are valid for the human body, or whatever type of body we are trying to animate. For example, we generally don't want a character's elbow to bend backward or the shoulder to flip upside down. Therefore, to restrict the range of possible solutions, the user may also wish to specify constraints on some of the angles and orientations of the model.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    The core FABRIK framework does not impose any specific method of incorporating constraints, but Aristidou & Lasenby suggest one way of doing this. Most importantly, they mention that constraints can be enforced at every step in the algorithm, and furthermore that this can result in a more feasible final posture (Aristidou & Lasenby, 2011, p. 248). We also find that our animations evolve more smoothly using this method. However, we actually found more inspiration from Jonathan Blow’s 2002 paper in terms of how to incorporate the constraints themselves into FABRIK; namely, at each iterative step, we ask the questions “’what direction does the bone point in?’ and ‘how twisted is it?’” (Blow, 2002).<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    To illustrate clearly how our implementation handles constraints, let’s start in the second part of the outer loop, i.e. the base-to-end traversal. We’ve just updated our joint’s position, and now need to determine its orientation and the position of the next joint. We start by taking its prior orientation and rotating it to align it with the orientation of the previous joint. Unity has a built-in function called FromToRotation which supposedly finds the shortest such rotation, and which we use to perform this realignment. Now that both orientations are aligned with the same axis, we take the angle difference between them (around the axis) using a quaternion inverse multiplication, and clamp it according to the user-defined angle limits.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    The first step, the realignment, gives us a frame of reference in which to impose our “twist” constraints in the second step. If we did not have this frame of reference, we would not have a well-defined concept of twisting. In other words, we define twist with respect to the previous segment, and therefore must realign to that axis, else we would have no other angle to compare with, and the clamp would be meaningless.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    We’ve dealt with the twist (1 degree of freedom), but we still need to figure out the direction of this joint’s orientation (2 degrees of freedom), which depends on the position of the next joint. The core FABRIK algorithm would determine the next point’s position from the current point simply by interpolating in the direction of its previous position, but we need a way of restricting this direction if we are to represent special types of joints. For example, a hinge joint restricts positions to a 2D plane, so we would want to project the next point’s location onto that plane.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    So we create another function, which gets the constrained direction vector between two points, according to the “type” of the first joint, of which we’d ideally define several. So far we have only implemented the aforementioned hinge joint (this projects the next point onto a plane by taking the vector difference between the two points and subtracting its projection onto the plane's normal), but the possibility for a ball-and-socket joint is also there. For something like this, Aristidou & Lasenby propose a conic section hung in space (2011, p. 248). All one would need to do is add another entry to our JointType enumeration, and provide a corresponding switch case to the get_direction function.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;One of the difficulties associated with the inverse kinematics problem is the issue of multiple solutions. For any target specified, there may be many valid solutions in configuration space. Ideally, the system should produce solutions that are valid for the human body, or whatever type of body one is trying to animate. For example, we generally don't want a character's elbow to bend backward or the shoulder to flip upside down. Therefore, to restrict the range of possible solutions, the user may also wish to specify constraints on some of the angles and orientations of the model.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    The core FABRIK framework does not impose any specific method of incorporating constraints, but Aristidou & Lasenby suggest one way of doing this. Most importantly, they mention that constraints can be enforced at every step in the algorithm, and furthermore that this can result in a more feasible final posture (Aristidou & Lasenby, 2011, p. 248). I also find that the animations evolve more smoothly using this method. However, I found more inspiration from Jonathan Blow’s 2002 article as for incorporating the constraints themselves into FABRIK; namely, at each iterative step, one asks the questions “’what direction does the bone point in?’ and ‘how twisted is it?’” (Blow, 2002).<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    To illustrate clearly how this implementation handles constraints, let’s start in the second part of the outer loop, i.e. the base-to-end traversal. We’ve just updated our joint’s position, and now need to determine its orientation and the position of the next joint. We start by taking its prior orientation and rotating it to align it with the orientation of the previous joint. Unity has a built-in function called FromToRotation which finds the shortest such rotation, and which we use to perform this realignment. Now that both orientations are aligned with the same axis, we take the angle difference between them (around the axis) using a quaternion inverse multiplication, and clamp it according to the user-defined angle limits.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    The first step, the realignment, gives us a frame of reference in which to impose our “twist” constraints in the second step. If we did not have this frame of reference, we would not have a well-defined concept of twisting. We define twist with respect to the parent joint's orientation, and therefore must realign to that axis, else we would have no angle to clamp.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    We’ve dealt with the twist (1 degree of freedom), but we still need to figure out the direction of this joint’s orientation (2 degrees of freedom), which depends on the position of the next joint. The vanilla FABRIK algorithm determines the next point from the current point simply by interpolating in the direction of its previous position, but we need a way of restricting this direction if we are to represent special joint behaviors. For example, in order to correctly model a hinge joint, we would want to project the next point’s location onto a 2D plane.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    So, after constraining the twist, we determine the constrained direction vector between two points according to the “type” of the first joint, of which I've so far implemented two: hinge joints and ball-and-socket joints. The hinge joint projects the next point onto a plane by taking the vector difference between the two points and subtracting its projection onto the plane's normal. As for the ball-and-socket joint, Aristidou & Lasenby suggest representing joint limit boundaries with a conic section hung in space, centered on the "line of sight" of the previous joint. These limits would be enforced by repositioning the target point (the point where the current joint's "line of sight" intersects with the plane of the conic section, before it is constrained) as the nearest point on the conic section (2011, p. 248). So far I have only implemented a simple representation for this, a circular loop defined only by its angle with respect to the direction of the previous joint. However, users with something more specific in mind have the option of defining their own joint types; all one would need to do is add another entry to the JointType enumeration, and provide a corresponding switch case to the get_direction function.</p>
 
     <div align="middle">
       <img src="images/rotation.png" align="middle" width="480px"/>
-      <figcaption align="middle">FABRIK, with rotational/orientational constraints applied (Aristidou & Lasenby, 2011, p. 249).</figcaption>
+      <figcaption align="middle">FABRIK, with rotational/orientational constraints applied (Aristidou & Lasenby, 2011, p. 249)</figcaption>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;We tried to make our constraint system convenient enough that an artist/animator could implement their own joint types to fit the requirements of a particular animation. The Unity engine allows developers to "serialize" variables for easy access in the editor. We thus designed our IK interface to allow the user to easily specify specific joint types as well as angle bounds:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;I tried to make the constraint system convenient enough that an artist/animator could easily adjust each joint to fit the requirements of a particular animation. The Unity engine allows developers to "serialize" variables for easy access in the editor. With this in mind, I designed the IK interface to allow the user to easily specify specific joint types as well as angle bounds:</p>
 
     <div align="middle">
       <img src="images/interface.png" align="middle" width="600px"/>
-      <figcaption align="middle">Our custom user interface in Unity. The user drags the joint transforms, target, etc. into the appropritate slots. Angle constraints are enabled by selecting the appropriate joint type, and when appropriate, an angle range and/or axis.</figcaption>
+      <figcaption align="middle">The joint module of my IK user interface. The user drags the joint transforms, target, etc. into the appropritate slots. Angle constraints are enabled by selecting the appropriate joint type, and when appropriate, an angle range and/or local axis.</figcaption>
     </div>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;Once we have our direction, we re-reorient the current joint with FromToRotation, and determine the next joint’s position with interpolation. This process repeats for every joint up to the end effector. When traversing the other direction (end to base), we essentially perform all of these steps in a different order: get the new direction (backwards), interpolate, reorient, and finally constrain the twist.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    Recall that we define each joint’s constraints with respect to the previous joint in the base-to-end direction. Therefore, when traversing end-to-base, we’d like some way of inverting the constraints so that we can keep using the same functions. We added a copy constructor to our Joint class to simplify this inversion. For twist constraints, as well as our hinge joint implementation, this amounts to switching and negating the min and max angles, but the method of inversion may depend on the type of joint. Thus, implementing new joint types also requires defining how they should be inverted during end-to-base traversal.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    Our IK system allows an animator to animate a model in real time by adjusting the position of target objects for each end effector. However, we also wanted to allow users to save and easily swap between animation clips. To accomplish this in our system, one creates a series of poses by manipulating the position and rotation of the target object, then saves each of those values as a keyframe. By interpolating between those keyframes (and thus moving the target object through space), we are able to produce smooth and continuous animation. By then binding each animation to a unique value, we can swap between animation clips at the press of a button.</p>
+    Recall that we define each joint’s constraints with respect to the previous joint in the base-to-end direction. Hence, when traversing end-to-base, we’d like to have some way of inverting the constraints so that we can keep using the same functions. For twist constraints, this amounts to switching and negating the min and max angles. However, inversion of direction constraints may depend on the type of joint. Thus, implementing new joint types also requires defining how they should be inverted during end-to-base traversal.</p>
 
-    <div align="center">
-      <table width="100%">
-          <tr>
-            <img src="images/controller1.png" width="600px" />
-          </tr></br>
-          <tr>
-            <img src="images/controller2.png" width="600px" />
-          </tr>
-          <figcaption align="middle">Unity's animation controller framework allows us to swap animations in real time. Above: an example of a finite state machine for transitions between animations. Below: Unity's animation controller automates interpolation between keyframes.</figcaption>
-      </table>
-  </div>
+  <h1 align="middle">Problems Encountered & Solutions</h1>
 
-  <h2 align="middle">Problems Encountered & Solutions</h2>
-
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;There was one critical problem that we struggled with throughout the entire duration of this project, and it involves our choice of skeleton model. When the IK system was first being developed, it was only tested on the right arm of the robot. This was convenient because the x-axis of each joint’s local transform in the right arm (the red arrow in the image below) points in the same direction along the arm:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;There was one critical problem that I struggled with throughout the entire duration of this project, and it involves my initial choice of skeleton model. When the IK system was first being developed, it was only tested on the right arm of the robot. This was convenient because the x-axis of each joint’s local transform in the right arm (the red arrow in the image below) points in the same direction along the arm:</p>
     
     <div align="middle">
       <img src="images/right_elbow.png" align="middle" width="600px"/>
-      <figcaption align="middle">Transform of the right elbow.</figcaption>
+      <figcaption align="middle">Transform of the right elbow</figcaption>
     </div>
     
     <p>&nbsp;&nbsp;&nbsp;&nbsp;However, the other limbs are not so well-aligned. The elbow of the left arm is not aligned with the arm at all:</p>
@@ -110,97 +101,63 @@
       <img src="images/left_elbow.png" align="middle" width="600px"/>
     </div>
     
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;Ideally, the artist creating the model would take special care to align these transforms according to some convention. However, we couldn’t figure out how to fix these alignments in the editor, so we wanted to see if we could deal with this discrepancy in our program. Once we had our IK system working for the right arm, we then tried to generalize it by calculating every joint’s intrinsic “alignment” during runtime, and taking that into account when reorienting.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    To see how this is achieved, we first note that the Unity engine represents each object’s global orientation as a rotation with respect to the world basis. For example, if you want the z-axis of an object’s local transform, you take its global orientation quaternion and multiply with the unit vector (0, 0, 1). If a joint’s “alignment,” the direction that points locally along the arm, is not guaranteed to be on any particular axis (as is the case with our robot’s left elbow), we must find the vector that multiplies with the joint’s orientation to result in this alignment direction. This process amounts to taking the direction of the next joint, and transforming it from world space to the current joint’s local space (Unity provides this operation via InverseTransformDirection). We get the actual direction of a joint by multiplying its orientation by its alignment vector.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    Another problem we’ve been dealing with is the issue of how to handle joint constraints at the base (in our model, this is the hip or the shoulder). We addressed this by specifying an extra transform as the "origin" for the kinematic chain. Joint constraints for the base are defined relative to this origin.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;Ideally, the artist creating the model would take special care to align these transforms according to some convention. However, I wanted to see if I could deal with this discrepancy anyway. Once I had IK working for the right arm, I then tried to generalize it by determining every joint’s intrinsic “alignment”, and taking that into account when reorienting.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    To see how this is achieved, first note that the Unity engine represents each object’s global <b>orientation</b> as a rotation (more precisely, a quaternion) with respect to the world basis. For example, if you wanted the z-axis of an object’s local transform, you'd take its <b>orientation</b> and multiply with the unit vector (0, 0, 1). If a joint’s <b>alignment</b>, the direction that points locally along the arm, is not guaranteed to be on any particular axis (as is the case with our robot’s left elbow), we must create a new, correctly-aligned GameObject to insert into the hierarchy between this joint and its parent. This object receives the IK treatment. One can also specify which local axis using the align_axis field; this stores the vector that multiplies with the joint’s <b>orientation</b> to result in this <b>alignment</b> direction.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    Another problem I've been dealing with is the issue of how to handle joint constraints at the base (in our model, this is the hip or the shoulder). I addressed this by requiring that the user specify an extra transform as the <b>origin</b> for the kinematic chain. Joint constraints for the base are defined relative to this origin. To clarify, the origin is not the same as the <b>base</b> of the kinematic chain. Furthermore, it matters significantly what direction to start with when beginning the second pass of the algorithm (base to end). If one chooses to start with the vector pointing from the base (whose position is fixed) to the first unfixed joint in the chain, the arm configuration might fail to evolve and eventually reach the target transform, because FABRIK will have forgotten information about joint constraints further down the arm. Alternatively, if one chooses to instead take the direction that the base <i>would have</i> been pointing in had we updated its position, one might observe a peculiar behavior in which the arm rapidly oscillates back and forth on every frame update, being effectively reflected across the line between the base and the target. To resolve this dilemma, I have chosen to use a linear combination of both vectors, their bisector. This dampens the undesirable behaviors such that they disappear after a sufficient number of FABRIK iterations.</p>
 
-  <h2 align="middle">Lessons Learned</h2>
-  
-  &nbsp;&nbsp;&nbsp;&nbsp;We learned at least two important lessons in the undertaking of this project:
-    <ul style="list-style-type:decimal;">
-      <li>It pays to start with a realistic scope. We overestimated the potential of our project in our initial proposal, and had to narrow our focus many times. Because we chose to write our own inverse kinematics system instead of using Unity's IK system, we ended up spending most of our efforts on that purpose. As game developers, we assumed that incorporating this system into a game environment would be relatively easy. However, even simple animations proved harder than we thought, partly because our IK system is not as robust as Unity's, and partly because the animation aspect of this project deviates in character from the programming aspect.</li>
-      <li>Because computer graphics is such a visually rich field, it would have helped us in the long run to have thought more, and earlier, about our deliverables. Specifically, we learned that we should have spent more time thinking about how to present all of the work we've done. Most of the work on this project went into the code itself, but our system is hard to demonstrate without lots of visuals. We did our best to provide as many of these as we could in our results below.</li>
-  </ul>
+  <h1 align="middle">Results</h1>
 
-  <h2 align="middle">Results</h2>
-
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;We use the Space Robot Kyle asset made by Unity Technologies to demonstrate our IK system.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    At first, we didn't have a way of automating our animations, so we tested our IK system by moving the target manually. We found that imposing constraints on the configuration space of the arm limits the range of solutions to those that are feasible and that evolve smoothly into each other as we move the target:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;I use the Space Robot Kyle asset made by Unity Technologies to demonstrate my system's capabilities.<br />&nbsp;&nbsp;&nbsp;&nbsp;
+    At first, I tested the IK system by moving each target manually, with no automation. I found that imposing the right constraints on the configuration space of the arm limits the range of solutions to those that are naturally feasible:</p>
 
     <div align="center">
       <table width="100%">
           <tr>
               <td align="middle">
-                  <img src="images/no_constraints.gif" width="480px" />
-                  <figcaption align="middle">Without constraints, the algorithm can return vastly different solutions for small changes in the target.</figcaption>
+                  <img src="images/no_constraints.png" width="480px" />
+                  <figcaption align="middle">Without constraints, the robot's elbow tends to strike unnatural orientations.</figcaption>
               </td>
               <td align="middle">
-                  <img src="images/with_constraints.gif" width="480px" />
-                  <figcaption align="middle">With constraints, the range of the algorithm is reduced to a particular subset of the configuration space.</figcaption>
+                  <img src="images/yes_constraints.png" width="480px" />
+                  <figcaption align="middle">We can constrain the elbow's direction to a particular range of configuration space, expressed as a local axis defining the plane, and a pair of angles with respect to the direction of the shoulder.</figcaption>
               </td>
           </tr>
       </table>
     </div>
     
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;Once we had the controller working, one of the first animations we were able to produce was a simple handshake with the right arm. Observe how the elbow and shoulder both evolve smoothly with the target transform:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;After finalizing these constraints, I proceeded to further explore the system's potential by creating a simple handshake animation with the right arm. This is done by attaching an empty GameObject as a target for the IK script, and manipulating its transform (and nothing else!) in some specified pattern. The IK system decides how the entire arm (hand, elbow, and shoulder) evolves according to the target. Observe how each part of the arm evolves smoothly with the target transform:</p>
 
     <div align="middle">
       <img src="images/handshake.gif" align="middle" width="600px"/>
-      <figcaption align="middle">A handshake is a good way to introduce yourself. We contrain the elbow as a hinge; notice how it consistently bends on a plane.</figcaption>
+      <figcaption align="middle">When a hinge axis is specified, and the twist is locked at 0 degrees, the elbow bends within a consistent plane relative to the shoulder.</figcaption>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;Unity's animation controller allows us to switch between animations in real time:</p>
-
-    <div align="middle">
-      <img src="images/hello.gif" align="middle" width="480px"/>
-      <figcaption align="middle">From a wave to a handshake, with the press of a button.</figcaption>
-    </div>
-
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;The above animations were made using Unity’s own animation controller framework, but we also took a shot at creating our own simple controller. This script stores a set of transforms as keyframes, each with a duration, as well as a Boolean indicating whether to interpolate linearly or with a smoothstep (Hermite polynomial) while near that keyframe. For example, here is a walking animation that we made with our simple controller:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;The above animations were made using Unity’s own animation controller framework, but I also took a shot at creating my own simple animator. This script stores a set of transforms as keyframes, each with a duration, as well as a Boolean indicating whether to interpolate linearly or with a smoothstep (Hermite polynomial) while near that keyframe. Here is a demonstration:</p>
 
     <div align="center">
       <table width="100%">
           <tr>
               <td align="middle">
                   <img src="images/walking.gif" width="480px" />
-                  <figcaption align="middle">With appropriate constraints.</figcaption>
+                  <figcaption align="middle">Constraints enabled</figcaption>
               </td>
               <td align="middle">
                   <img src="images/walking_no_constraints.gif" width="480px" />
-                  <figcaption align="middle">Without constraints.</figcaption>
+                  <figcaption align="middle">Constraints disabled</figcaption>
               </td>
           </tr>
       </table>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;This result is particularly significant because it was accomplished essentially without any of Unity’s extra tools. You can clearly see the improvement due to our constraint system; observe that the knees and right elbow always bend correctly in the constrained case unlike in the unconstrained case. This animation can certainly be refined with better constraints, better joint alignment, and/or more keyframes. Our system contains plenty of freedom in which to develop more accurate postures.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;This result is particularly significant because it was accomplished essentially without any of Unity’s extra tools. You can also clearly see the improvement due to the constraint system; observe that the knees and right elbow always bend correctly in the constrained case unlike in the unconstrained case. The system contains plenty of freedom in which to develop more accurate postures; this animation can certainly be refined with better constraints, better joint alignment, and/or more keyframes.</p>
 
-  <h2 align="middle">References</h2>
+  <h1 align="middle">References</h1>
 
     <p>Aristidou, A., & Lasenby, J. (2011). FABRIK: A fast, iterative solver for the Inverse Kinematics problem. <i>Graphical Models, 73</i> (5), 243-260. https://doi.org/10.1016/j.gmod.2011.05.003</p>
 
     <p>Blow, J. (April 2002). Inverse Kinematics with Quaternion Joint Limits. <i>The Inner Product</i>. http://number-none.com/product/IK%20with%20Quaternion%20Joint%20Limits/</p>
 
-  <h2 align="middle">Contributions</h2>
-    
-    <ul style="list-style-type:square;">
-      <li>Brian Stone: IK system, constraint system and interface, IK research, simple controller and walking animation</li>
-      <li>Eric McCormick: animation controller, wave animation</li>
-      <li>Alex Chan: handshake and walking animation</li>
-      <li>Jinwoo Park: reaching animation and constraint analysis</li>
-    </ul>
-
-    <p>All group members contributed to the proposal, milestone and final report.</p>
-
     <p>Space Robot Kyle was created by Unity Technologies.</p>
-
-    </br>
-
-    <h3 align="middle">Video: https://tinyurl.com/Team5FinalVideo</h3>
-
-    <h3 align="middle">Milestone: https://brian-stone.github.io/184-final-project/milestone</h3>
-
-    <h3 align="middle">Proposal: https://brian-stone.github.io/184-final-project/proposal</h3>
 
 </body>
 </html>

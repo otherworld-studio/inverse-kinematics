@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// An animation framework I made before remembering that Unity already has one
+
 [Serializable]
 public struct KeyFrame
 {
