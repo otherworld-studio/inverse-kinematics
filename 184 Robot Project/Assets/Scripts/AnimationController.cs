@@ -22,6 +22,9 @@ public class AnimationController : MonoBehaviour
         } else if (Input.GetKeyDown("h"))
         {
             animator.Play("Handshake");
+        } else if (Input.GetKeyDown("c"))
+        {
+            animator.Play("Cylinder");
         }
     }
 }

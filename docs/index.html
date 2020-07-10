@@ -27,10 +27,10 @@
     <table width="100%">
         <tr>
             <td align="middle">
-                <img src="images/handshake.gif" width="480px" />TODO: new gif
+                <img src="images/handshake.gif" width="480px" />
             </td>
             <td align="middle">
-                <img src="images/reach.gif" width="480px" />TODO: new gif
+                <img src="images/cylinder.gif" width="480px" />
             </td>
         </tr>
     </table>
@@ -77,7 +77,7 @@
 
     <div align="middle">
       <img src="images/interface.png" align="middle" width="600px"/>
-      <figcaption align="middle">The IK user interface in Unity. The user drags the joint transforms, target, etc. into the appropritate slots. Angle constraints are enabled by selecting the appropriate joint type, and when appropriate, an angle range and/or local axis.</figcaption>
+      <figcaption align="middle">The joint module of my IK user interface. The user drags the joint transforms, target, etc. into the appropritate slots. Angle constraints are enabled by selecting the appropriate joint type, and when appropriate, an angle range and/or local axis.</figcaption>
     </div>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;Once we have our direction, we re-reorient the current joint with FromToRotation, and determine the next joint’s position with interpolation. This process repeats for every joint up to the end effector. When traversing the other direction (end to base), we essentially perform all of these steps in a different order: get the new direction (backwards), interpolate, reorient, and finally constrain the twist.<br />&nbsp;&nbsp;&nbsp;&nbsp;
@@ -100,47 +100,47 @@
     
     <p>&nbsp;&nbsp;&nbsp;&nbsp;Ideally, the artist creating the model would take special care to align these transforms according to some convention. However, I couldn’t figure out how to fix these alignments in the editor, so I wanted to see if I could deal with this discrepancy in the program. Once I had IK working for the right arm, I then tried to generalize it by calculating every joint’s intrinsic “alignment” during runtime, and taking that into account when reorienting.<br />&nbsp;&nbsp;&nbsp;&nbsp;
     To see how this is achieved, first note that the Unity engine represents each object’s global orientation as a rotation with respect to the world basis. For example, if you want the z-axis of an object’s local transform, you take its global orientation quaternion and multiply with the unit vector (0, 0, 1). If a joint’s “alignment,” the direction that points locally along the arm, is not guaranteed to be on any particular axis (as is the case with our robot’s left elbow), we must find the vector that multiplies with the joint’s orientation to result in this alignment direction. This process amounts to taking the direction of the next joint, and transforming it from world space to the current joint’s local space (Unity provides this operation via InverseTransformDirection). We get the actual direction of a joint by multiplying its orientation by its alignment vector.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    Another problem I've been dealing with is the issue of how to handle joint constraints at the base (in our model, this is the hip or the shoulder). I addressed this by specifying an extra transform as the "origin" for the kinematic chain. Joint constraints for the base are defined relative to this origin. TODO: oscillations</p>
+    Another problem I've been dealing with is the issue of how to handle joint constraints at the base (in our model, this is the hip or the shoulder). I addressed this by specifying an extra transform as the "origin" for the kinematic chain. Joint constraints for the base are defined relative to this origin. TODO: talk about oscillations</p>
 
   <h1 align="middle">Results</h1>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;I use the Space Robot Kyle asset made by Unity Technologies to demonstrate my system's capabilities.<br />&nbsp;&nbsp;&nbsp;&nbsp;
-    At first, I tested the IK system by moving each target manually, with no automation. I found that imposing constraints on the configuration space of the arm limits the range of solutions to those that are feasible and that evolve smoothly into each other as the target is moved:</p>
+    At first, I tested the IK system by moving each target manually, with no automation. I found that imposing the right constraints on the configuration space of the arm limits the range of solutions to those that are naturally feasible:</p>
 
     <div align="center">
       <table width="100%">
           <tr>
               <td align="middle">
                   <img src="images/no_constraints.gif" width="480px" />
-                  <figcaption align="middle">TODO: new gif. Without constraints, the algorithm can return vastly different solutions for small changes in the target.</figcaption>
+                  <figcaption align="middle">TODO Without constraints, the robot's shoulder tends to strike unnatural orientations.</figcaption>
               </td>
               <td align="middle">
                   <img src="images/with_constraints.gif" width="480px" />
-                  <figcaption align="middle">TODO: new gif. With constraints, the range of the algorithm is reduced to a particular subset of the configuration space.</figcaption>
+                  <figcaption align="middle">TODO We can constrain the shoulder's orientation to a particular range of configuration space. This range is expressed as a pair of angles with respect to the root transform.</figcaption>
               </td>
           </tr>
       </table>
     </div>
     
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;TODO: Once I had the controller working, TODO simple handshake with the right arm. Observe how the elbow and shoulder both evolve smoothly with the target transform:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;After finalizing these constraints, I proceeded to further explore the system's potential by creating a simple handshake animation with the right arm. This is done by attaching an empty GameObject as a target for the IK script, and manipulating its transform (and nothing else's) in some specified pattern. The IK system decides how the entire arm (hand, elbow, and shoulder) evolves according to the target. Observe how each part of the arm evolves smoothly with the target transform:</p>
 
     <div align="middle">
       <img src="images/handshake.gif" align="middle" width="600px"/>
-      <figcaption align="middle">TODO: new gif. A handshake is a good way to introduce yourself. I contrain the elbow as a hinge; notice how it consistently bends on a plane.</figcaption>
+      <figcaption align="middle">When a hinge axis is specified, and the twist is locked at 0 degrees, the elbow bends within a consistent plane relative to the shoulder.</figcaption>
     </div>
 
-    <p>&nbsp;&nbsp;&nbsp;&nbsp;TODO: The above animations were made using Unity’s own animation controller framework, but I also took a shot at creating my own simple controller. This script stores a set of transforms as keyframes, each with a duration, as well as a Boolean indicating whether to interpolate linearly or with a smoothstep (Hermite polynomial) while near that keyframe. For example, here is a walking animation that I made with this homemade controller:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;The above animations were made using Unity’s own animation controller framework, but I also took a shot at creating my own simple animator. This script stores a set of transforms as keyframes, each with a duration, as well as a Boolean indicating whether to interpolate linearly or with a smoothstep (Hermite polynomial) while near that keyframe. Here is a demonstration:</p>
 
     <div align="center">
       <table width="100%">
           <tr>
               <td align="middle">
                   <img src="images/walking.gif" width="480px" />
-                  <figcaption align="middle">With constraints enabled</figcaption>
+                  <figcaption align="middle">Constraints enabled</figcaption>
               </td>
               <td align="middle">
                   <img src="images/walking_no_constraints.gif" width="480px" />
-                  <figcaption align="middle">With constraints disabled</figcaption>
+                  <figcaption align="middle">Constraints disabled</figcaption>
               </td>
           </tr>
       </table>
