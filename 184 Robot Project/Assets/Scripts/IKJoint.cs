@@ -28,23 +28,31 @@ public class IKJoint : MonoBehaviour
     // Determined by align_axis, set permanently in Awake()
     private Quaternion local_frame;
     private Quaternion local_space { get { return rotation * local_frame; } }
+    private bool flip_sign;
 
     public Vector3 tangent { get; private set; }
 
     void Awake()
     {
+        Debug.Assert(type != JointType.Hinge || align_axis != hinge_axis);
         switch (align_axis)
         {
             case Axis.x:
                 tangent = Vector3.right;
                 local_frame = Quaternion.LookRotation(Vector3.right, Vector3.forward);
+                if (hinge_axis == Axis.y)
+                    flip_sign = true;
                 break;
             case Axis.y:
                 tangent = Vector3.up;
                 local_frame = Quaternion.LookRotation(Vector3.up, Vector3.right);
+                if (hinge_axis == Axis.z)
+                    flip_sign = true;
                 break;
-            default:
+            case Axis.z:
                 tangent = Vector3.forward;
+                if (hinge_axis == Axis.x)
+                    flip_sign = true;
                 break;
         }
     }
@@ -78,11 +86,7 @@ public class IKJoint : MonoBehaviour
         Debug.Assert(angle >= 0f);
         if (angle > 180f) angle -= 360f;
         float dot = Vector3.Dot(axis, angle_axis);
-        Debug.Assert(Mathf.Abs(dot) > 0.99f || Mathf.Abs(angle) < 1f); // TODO: why is this failing again?
-        if (Mathf.Abs(dot) < 0.99f && Mathf.Abs(angle) > 1f)
-        {
-            Debug.Log(Mathf.Abs(dot) + " " + Mathf.Abs(angle)); // DEBUG
-        }
+        Debug.Assert(Mathf.Abs(dot) > 0.99f || Mathf.Abs(angle) < 1f);
         if (dot < 0f) angle = -angle;
         rotation = Quaternion.AngleAxis(Mathf.Clamp(angle, min, max), axis) * other;
     }
@@ -96,97 +100,44 @@ public class IKJoint : MonoBehaviour
     //Constrains a direction vector according to angle constraints. Returns a unit vector. dir does not need to be normalized.
     public Vector3 constrain_direction(Vector3 dir, bool reverse = false)
     {
-        if (type == JointType.hinge)
+        if (type == JointType.Hinge)
         {
-            /*Alternative implementation which is somehow slower in Unity? TODO: needs to be tested again since replacing Matrix4x4 with Quaternion
-            Matrix4x4 o2w = get_coord_space();
-            Matrix4x4 w2o = o2w.transpose;
-            Debug.Assert(o2w * w2o == Matrix4x4.identity);//Orthonormality check
+            Quaternion o2w = local_space;
+            Quaternion w2o = Quaternion.Inverse(o2w);
+            Debug.Assert(o2w * w2o == Quaternion.identity); // Orthonormality check
 
-            Vector3 diro = w2o * dir;
-            ref float right = ref diro.x, up = ref diro.y, forward = ref diro.z;
+            Vector3 dir_local = w2o * dir;
 
-            ref float a = ref diro.x, b = ref diro.y, c = ref diro.z;
-            bool flip = reverse;
-            Debug.Assert(axis != IK.alignment_axis);
-            switch (IK.alignment_axis)
+            // A and B will point to coordinates on the hinge plane, with A being in the direction of the joint (which is always z in local_frame)
+            // C is the hinge axis component and will be set to zero
+            ref float a = ref dir_local.z;
+            ref float b = ref dir_local.x;
+            ref float c = ref dir_local.y;
+            if (flip_sign)
             {
-                case Axis.x:
-                    right = ref diro.z;
-                    up = ref diro.x;
-                    forward = ref diro.y;
-
-                    a = ref right;
-                    switch (axis)
-                    {
-                        case Axis.y:
-                            b = ref forward;
-                            c = ref up;
-                            flip = !flip;
-                            break;
-                        default:
-                            b = ref up;
-                            c = ref forward;
-                            break;
-                    }
-                    break;
-                case Axis.y:
-                    right = ref diro.y;
-                    up = ref diro.z;
-                    forward = ref diro.x;
-
-                    a = ref up;
-                    switch (axis)
-                    {
-                        case Axis.z:
-                            b = ref right;
-                            c = ref forward;
-                            flip = !flip;
-                            break;
-                        default:
-                            b = ref forward;
-                            c = ref right;
-                            break;
-                    }
-                    break;
-                default:
-                    a = ref forward;
-                    switch (axis)
-                    {
-                        case Axis.x:
-                            b = ref up;
-                            c = ref right;
-                            flip = !flip;
-                            break;
-                        default:
-                            b = ref up;
-                            c = ref forward;
-                            break;
-                    }
-                    break;
+                b = ref dir_local.y;
+                c = ref dir_local.x;
             }
 
             float norm = Mathf.Sqrt(a * a + b * b);
             Debug.Assert(norm > 0.0001f);
-            float cos_theta = ((reverse) ? -a : a) / norm;
+            float cos_theta = ((reverse) ? -a : a) / norm; // In the reverse case, we clamp around -z
             Debug.Assert(!float.IsInfinity(cos_theta) && !float.IsNaN(cos_theta));
-            float angle = (flip ^ b < 0f) ? -Mathf.Acos(cos_theta) : Mathf.Acos(cos_theta);
-            float min = Mathf.Deg2Rad * ((reverse) ? -thetaMax : thetaMin);
-            float max = Mathf.Deg2Rad * ((reverse) ? -thetaMin : thetaMax);
-            angle = Mathf.Clamp(angle, min, max);
+            float angle = (flip_sign ^ b < 0f) ? -Mathf.Acos(cos_theta) : Mathf.Acos(cos_theta); // If FLIP_SIGN is false, sign of ANGLE matches the sign of B; otherwise, they are opposite
+            angle = Mathf.Clamp(angle, Mathf.Deg2Rad * thetaMin, Mathf.Deg2Rad * thetaMax);
 
             a = (reverse) ? -Mathf.Cos(angle) : Mathf.Cos(angle);
-            b = (flip) ? -Mathf.Sin(angle) : Mathf.Sin(angle);
+            b = (flip_sign) ? -Mathf.Sin(angle) : Mathf.Sin(angle);
             c = 0f;
 
-            return o2w * diro;
-            */
+            return o2w * dir_local;
 
+            /* The old wethod, much simpler but half as fast
             Debug.Assert(hinge_axis != align_axis);
             Vector3 n = rotation * ((hinge_axis == Axis.x) ? Vector3.right :
                                     (hinge_axis == Axis.y) ? Vector3.up :
-                                                       Vector3.forward);
-            dir -= Vector3.Dot(dir, n) * n;// Planar projection
+                                                             Vector3.forward);
+            dir -= Vector3.Dot(dir, n) * n; // Planar projection
             Vector3 straight = rotation * tangent;
             if (reverse) straight = -straight;
             float min = (reverse) ? -thetaMax : thetaMin;
@@ -194,8 +145,9 @@ public class IKJoint : MonoBehaviour
             float angle = Mathf.Clamp(Vector3.SignedAngle(straight, dir, n), min, max);
 
             return Quaternion.AngleAxis(angle, n) * straight;
+            */
         }
-        if (type == JointType.ball_and_socket)
+        if (type == JointType.BallAndSocket)
         {
             Quaternion o2w = local_space;
             Quaternion w2o = Quaternion.Inverse(o2w);
@@ -203,12 +155,12 @@ public class IKJoint : MonoBehaviour
             float x, y, z;
 
             Debug.Assert(psiMax >= 0f && psiMax <= 180f);
-            float r = Mathf.Abs(Mathf.Tan(psiMax * Mathf.Deg2Rad));//TODO: cache this on Awake?
+            float r = Mathf.Abs(Mathf.Tan(psiMax * Mathf.Deg2Rad)); //TODO: cache this on Awake?
             bool obtuse = psiMax > 90f;
 
             Vector3 diro = w2o * dir;
-            bool right_way = diro.z > 0f ^ reverse;//"Is dir pointing in the same approximate direction as the joint? (is their dot product positive?)"
-            if (float.IsInfinity(r))
+            bool right_way = diro.z > 0f ^ reverse; // "Is dir pointing in the same approximate direction we're traveling toward? (is their dot product positive?)"
+            if (float.IsInfinity(r)) // psi is ~90 degrees
             {
                 if (right_way) return dir.normalized;
 
@@ -219,9 +171,9 @@ public class IKJoint : MonoBehaviour
             else
             {
                 float m = diro.y / diro.x;
-                if (float.IsInfinity(m) || float.IsNaN(m))
+                if (float.IsInfinity(m) || float.IsNaN(m)) // local x component is zero
                 {
-                    float y_proj = Mathf.Abs(diro.y / diro.z);
+                    float y_proj = Mathf.Abs(diro.y / diro.z); // project onto a circle 1 unit in the z direction
                     Debug.Assert(!float.IsNaN(y_proj));
                     if (right_way && y_proj <= r || obtuse && y_proj >= r) return dir.normalized;
 
@@ -251,9 +203,9 @@ public class IKJoint : MonoBehaviour
 
     private enum JointType
     {
-        free,
-        hinge,
-        ball_and_socket
+        Free,
+        Hinge,
+        BallAndSocket
     }
 
     private enum Axis
